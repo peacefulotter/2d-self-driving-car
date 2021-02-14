@@ -24,7 +24,10 @@ With a probablity of "Mutation rate", the weight/bias `[i][j]` will be increment
 
 
 ## Results
-So far, 
+So far, after 10-15 generations, the nn is able drive the whole track quite easily although a lot of improvements can be made.
+After a certain point, it get stuck and does not "train" anymore.
+The whole process could be improved with NEAT and auto-selection of the most performent nns (done manually at the moment)
+
 
 ## Params
 #### Neural network
@@ -37,5 +40,5 @@ So far,
 - Mutation rate: 0.03
 
 #### Others
-- Population: up to 300 / generation (+ causes lag and drops fps)
+- Population: up to 300 / generation (+ causes lag and drops fps, depends of youur cpu)
 
