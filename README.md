@@ -22,7 +22,11 @@ The chances of crossover is defined by the "crossover rate"
 Changes the weights and biases of a nn randomly
 With a probablity of "Mutation rate", the weight/bias `[i][j]` will be incremented by `+- (random() - 0.5) * Mutation intensity`
 
-## PARAMS
+
+## Results
+So far, 
+
+## Params
 #### Neural network
 - Dimensions = (9, 20, 2)
 - Activation functions: (ReLU, HyperTan)
@@ -31,4 +35,7 @@ With a probablity of "Mutation rate", the weight/bias `[i][j]` will be increment
 - Crossover rate: 0.5
 - Mutation intensity: 2
 - Mutation rate: 0.03
+
+#### Others
+- Population: up to 300 / generation (+ causes lag and drops fps)
 
