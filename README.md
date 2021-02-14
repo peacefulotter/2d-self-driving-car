@@ -23,6 +23,9 @@ Changes the weights and biases of a nn randomly
 With a probablity of "Mutation rate", the weight/bias `[i][j]` will be incremented by `+- (random() - 0.5) * Mutation intensity`
 
 
+## Observations
+A single layer network is enough, NNs that have more than 1 layer don't learn to drive. it might be because there are too much weights and biases. A higher mutation rate and/or mutation intensity might solve it.
+
 ## Results
 So far, after 10-15 generations, the nn is able drive the whole track quite easily although a lot of improvements can be made.
 After a certain point, it get stuck and does not "train" anymore.
