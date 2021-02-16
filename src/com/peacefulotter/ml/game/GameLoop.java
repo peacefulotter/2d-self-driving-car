@@ -1,11 +1,12 @@
 package com.peacefulotter.ml.game;
 
+import com.peacefulotter.ml.Main;
 import com.peacefulotter.ml.utils.Time;
 import javafx.animation.AnimationTimer;
 
 public class GameLoop extends AnimationTimer
 {
-    private static final double FRAMES_CAP = 500;
+    private static final double FRAMES_CAP = 60;
     private static final double FRAME_TIME = 1.0 / FRAMES_CAP;
 
     private final Circuit circuit;
@@ -49,7 +50,7 @@ public class GameLoop extends AnimationTimer
 
             if (framesCounter >= Time.SECOND)
             {
-                System.out.println(frames);
+                Main.setFPS(frames);
                 frames = 0;
                 framesCounter = 0;
             }

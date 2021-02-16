@@ -5,18 +5,24 @@ import com.peacefulotter.ml.ia.loss.LossFunc;
 import com.peacefulotter.ml.maths.Matrix2d;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class NeuralNetwork
 {
-    private final int layers;
-
     private final HashMap<Integer, Matrix2d> w;
     private final HashMap<Integer, Matrix2d> b;
     private final HashMap<Integer, ActivationFunc> activations;
 
+    private final int layers;
+    private final int[] dimensions;
+    private final ActivationFunc[] activationFuncs;
+
     public NeuralNetwork( int[] dimensions, ActivationFunc[] activations )
     {
         this.layers = dimensions.length;
+        this.dimensions = dimensions;
+        this.activationFuncs = activations;
 
         this.w = new HashMap<>();
         this.b = new HashMap<>();
@@ -27,6 +33,24 @@ public class NeuralNetwork
             this.w.put(i, Matrix2d.genRandom(dimensions[i - 1], dimensions[i]).div((float)Math.sqrt(dimensions[i-1])));
             this.b.put(i, new Matrix2d(1, dimensions[i]));
             this.activations.put(i + 1, activations[i - 1] );
+        }
+    }
+
+    public NeuralNetwork( NeuralNetwork other )
+    {
+        this.layers = other.dimensions.length;
+        this.dimensions = Arrays.copyOf( other.dimensions, layers );
+        this.activationFuncs = Arrays.copyOf( other.activationFuncs, other.activationFuncs.length );
+
+        this.w = new HashMap<>();
+        this.b = new HashMap<>();
+        this.activations = new HashMap<>();
+
+        for (int i = 1; i < this.layers; i++)
+        {
+            this.w.put(i, new Matrix2d( other.getW( i ) ));
+            this.b.put(i, new Matrix2d( other.getB( i ) ));
+            this.activations.put(i + 1, other.activations.get( i + 1 ));
         }
     }
 
@@ -64,15 +88,15 @@ public class NeuralNetwork
     public HashMap<Integer, HashMap<String, Matrix2d>> back_prop( LossFunc loss, HashMap<Integer, Matrix2d> z, HashMap<Integer, Matrix2d> a, Matrix2d y) {
         Matrix2d pred = a.get( layers );
         Matrix2d delta = loss.gradient(pred, y).mul(activations.get(layers).gradient(pred));
-        Matrix2d dw = a.get( layers - 1 ).transpose().dot( delta );
+        Matrix2d dw = a.get( layers - 1 ).dot( delta );
 
         HashMap<Integer, HashMap<String, Matrix2d>> deltaParams = new HashMap<>();
         deltaParams.put( layers - 1, insertParam( dw, delta ) );
 
         for (int i = layers - 1; i >= 2; i--)
         {
-            delta = delta.dot(w.get(i).transpose()).mul(activations.get(i).gradient(z.get(i)));
-            dw = a.get( i - 1 ).transpose().dot( delta );
+            delta = delta.mul(w.get(i).transpose()).mul(activations.get(i).gradient(z.get(i)));
+            dw = a.get( i - 1 ).dot( delta );
             deltaParams.put( i - 1, insertParam( dw, delta ) );
         }
 
@@ -80,8 +104,8 @@ public class NeuralNetwork
     }
 
     private void updateWeights(int i, double lr, HashMap<String, Matrix2d> params ) {
-        w.get( i ).sub( params.get( "dw" ).mul( lr ) );
-        b.get( i ).sub( params.get( "delta" ).mul( lr ) );
+        w.put( i, w.get( i ).sub( params.get( "dw" ).mul( lr ) ) );
+        b.put( i, b.get( i ).sub( params.get( "delta" ).mul( lr ) ) );
     }
 
     public Matrix2d trainOnce( Matrix2d x, Matrix2d y, LossFunc criterion, double lr )
@@ -113,8 +137,6 @@ public class NeuralNetwork
 
     public void train(Matrix2d x, Matrix2d y, LossFunc criterion, double lr, int epochs, int batchSize, int printPeriod )
     {
-        assert x.rows == y.rows;
-
         for ( int epoch = 0; epoch < epochs; epoch++ )
         {
             int[] indices = generateRandomIndices(x.rows);
@@ -130,13 +152,35 @@ public class NeuralNetwork
                 trainOnce( trainX, trainY, criterion, lr );
             }
 
-            if ( (epoch + 1) % printPeriod == 0 )
+            if ( (epoch+1) % printPeriod == 0 )
             {
                 Matrix2d pred = predict(x);
                 double loss = criterion.loss(pred, y);
-                System.out.println("Loss at epoch" + epoch + "/" + epochs + ": " + loss);
+                System.out.println("Loss at epoch " + (epoch+1) + "/" + epochs + ": " + loss);
             }
         }
+    }
+
+    public NeuralNetwork applyFunction( Function<Matrix2d, Matrix2d> func )
+    {
+        NeuralNetwork nn = new NeuralNetwork( this );
+        for (int i = 1; i < layers; i++)
+        {
+            nn.setW( i, func.apply( getW(i) ) );
+            nn.setB( i, func.apply( getB(i) ) );
+        }
+        return nn;
+    }
+
+    public NeuralNetwork applyFunction( BiFunction<Matrix2d, Matrix2d, Matrix2d> func, NeuralNetwork other )
+    {
+        NeuralNetwork nn = new NeuralNetwork( this );
+        for (int i = 1; i < layers; i++)
+        {
+            nn.setW( i, func.apply( getW(i), other.getW(i) ) );
+            nn.setB( i, func.apply( getB(i), other.getB(i) ) );
+        }
+        return nn;
     }
 
     public Matrix2d getW( int i )

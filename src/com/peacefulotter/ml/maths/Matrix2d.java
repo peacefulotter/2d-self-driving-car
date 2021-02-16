@@ -24,7 +24,6 @@ public class Matrix2d
     public Matrix2d( double[][] m )
     {
         this.m = deepCopy( m );
-        System.out.println( Arrays.deepToString(m));
         this.rows = m.length;
         this.cols = m[0].length;
     }
@@ -43,14 +42,14 @@ public class Matrix2d
         return res.applyFunc( func );
     }
 
-    public Matrix2d applyFunc( MatrixLambda func)
+    public Matrix2d applyFunc( MatrixLambda func )
     {
         Matrix2d res = new Matrix2d( rows, cols );
         for ( int i = 0; i < rows; i++ )
         {
             for ( int j = 0; j < cols; j++ )
             {
-                func.apply( res, i, j );
+                res.m[i][j] = func.apply( res, i, j );
             }
         }
         return res;
@@ -59,17 +58,20 @@ public class Matrix2d
 
     public static Matrix2d genRandom( int rows, int cols) {
         Random r = new Random();
-        return Matrix2d.applyFunc(( mat, i, j) -> mat.m[i][j] = r.nextGaussian(), rows, cols);
+        return Matrix2d.applyFunc( (mat, i, j) -> r.nextGaussian(), rows, cols);
     }
 
     public Matrix2d transpose()
     {
-        return Matrix2d.applyFunc(( mat, i, j) -> mat.m[i][j] = m[j][i], cols, rows);
+        return Matrix2d.applyFunc( (mat, i, j) -> m[j][i], cols, rows);
     }
 
     public double mean() {
         double[] res = new double[] { 0d };
-        applyFunc( (m, i, j) -> res[0] += getAt( i, j ) );
+        applyFunc( (m, i, j) -> {
+            res[0] += getAt( i, j );
+            return 0;
+        } );
         return res[0] / (rows * cols);
     }
 
@@ -80,6 +82,7 @@ public class Matrix2d
         double[] res = new double[] { 0d };
         applyFunc( (m, i, j) -> {
             res[0] += Math.pow( getAt( i, j ) - mean, 2);
+            return 0;
         } );
         return res[0] / (rows * cols);
     }
@@ -95,19 +98,21 @@ public class Matrix2d
         double mean = mean();
         double variance = variance(mean);
         double std = std(variance);
-        return sub( mean ).div( std );
+        if (mean == 0 && std == 0)
+            return new Matrix2d( rows, cols );
+        return applyFunc( (mat,i,j) -> (m[i][j] - mean) / std );
     }
 
     public Matrix2d plus( double a )
     {
-        return Matrix2d.applyFunc(( mat, i, j) -> mat.m[i][j] = this.m[i][j] + a, rows, cols);
+        return Matrix2d.applyFunc(( mat, i, j) -> m[i][j] + a, rows, cols);
     }
 
     public Matrix2d sub( double a ) { return plus(-a); }
 
     public Matrix2d mul( double a )
     {
-        return Matrix2d.applyFunc(( mat, i, j) -> mat.m[i][j] = this.m[i][j] * a, rows, cols);
+        return Matrix2d.applyFunc(( mat, i, j) -> m[i][j] * a, rows, cols);
     }
 
     public Matrix2d div( double a )
@@ -117,13 +122,17 @@ public class Matrix2d
 
     public Matrix2d pow( double a )
     {
-        return Matrix2d.applyFunc(( mat, i, j) -> mat.m[i][j] = Math.pow(this.m[i][j], a), rows, cols);
+        return Matrix2d.applyFunc( (mat, i, j) -> Math.pow(m[i][j], a), rows, cols);
     }
 
     public Matrix2d plus( Matrix2d other )
     {
-        if ( rows != other.rows || cols != other.cols ) throw new AssertionError();
-        return Matrix2d.applyFunc( (mat, i, j) -> mat.m[i][j] = this.m[i][j] + other.m[i][j], rows, cols);
+        if (rows >1 && other.rows == 1 && cols == other.cols)
+        {
+            return applyFunc( (mat, i, j) -> m[i][j] + other.m[0][j] );
+        }
+        else if ( rows != other.rows || cols != other.cols ) throw new AssertionError();
+        return Matrix2d.applyFunc( (mat, i, j) -> m[i][j] + other.m[i][j], rows, cols);
     }
 
     public Matrix2d sub( Matrix2d other )
@@ -131,9 +140,16 @@ public class Matrix2d
         return plus(other.mul(-1));
     }
 
+    private Matrix2d mulSameSize( Matrix2d other )
+    {
+        return applyFunc( (mat, i, j) -> m[i][j] * other.m[i][j] );
+    }
+
     public Matrix2d mul( Matrix2d other )
     {
-        if ( cols != other.rows ) throw new AssertionError();
+        if ( rows == other.rows && cols == other.cols )
+            return mulSameSize( other );
+        else if ( cols != other.rows ) throw new AssertionError();
 
         return Matrix2d.applyFunc( (mat, i, j) -> {
             double value = 0;
@@ -141,7 +157,7 @@ public class Matrix2d
             {
                 value += this.m[i][k] * other.m[k][j];
             }
-            mat.setAt( i, j, value );
+            return value;
         }, rows, other.cols);
     }
 
@@ -156,7 +172,7 @@ public class Matrix2d
         {
             for ( int j = 0; j < cols; j++ )
             {
-                res.setAt( i, j, getAt( i, j ) );
+                res.setAt( i - a, j, getAt( i, j ) );
             }
         }
         return res;
@@ -170,7 +186,12 @@ public class Matrix2d
 
     public Matrix2d shuffleRows(int[] indices) {
         if ( indices.length != rows ) throw new AssertionError();
-        return Matrix2d.applyFunc( (mat, i, j) -> mat.m[i][j] = m[indices[i]][j], rows, cols);
+        return Matrix2d.applyFunc( (mat, i, j) -> m[indices[i]][j], rows, cols);
+    }
+
+    public double[] getRow( int i )
+    {
+        return m[i];
     }
 
     public double getAt(int i, int j)

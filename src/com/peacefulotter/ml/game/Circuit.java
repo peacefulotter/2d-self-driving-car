@@ -1,13 +1,17 @@
 package com.peacefulotter.ml.game;
 
-import com.peacefulotter.ml.Loader;
+import com.peacefulotter.ml.ia.IACar;
+import com.peacefulotter.ml.utils.Loader;
 import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.maths.Matrix2d;
+import com.peacefulotter.ml.maths.Vector2d;
+import com.peacefulotter.ml.utils.Input;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -18,29 +22,39 @@ import java.util.List;
 
 public class Circuit extends StackPane
 {
-    private static final int ARROWS = 5;
+    // train one neural network before using GA
+    // this uses supervised learning and gradient descent with a dataset I made playing the game
+    private static final boolean TRAIN_BEFORE = true;
+    private static final boolean USER_CONTROL = false;
+
+    private static final List<Matrix2d> positions = new ArrayList<>();
+    private static final List<Vector2d> controls = new ArrayList<>();
     
     private final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);;
 
     private final Canvas canvas;
     private final GraphicsContext ctx;
     private final Genetic genetic;
-    private final List<Car> cars;
-    private final Matrix2d hitboxMap;
+    private final List<IACar> cars;
 
     private int population;
     private int generation;
 
-    public Circuit( Canvas canvas, int population )
+    public Circuit( Canvas canvas, int population,
+                    SpinnerValueFactory<Double> crossRate,
+                    SpinnerValueFactory<Double> mutStrength,
+                    SpinnerValueFactory<Double> mutRate )
     {
         this.canvas = canvas;
         this.ctx = canvas.getGraphicsContext2D();
-        this.genetic = new Genetic();
+        this.genetic = new Genetic(crossRate, mutStrength, mutRate);
         this.cars = new ArrayList<>();
         this.population = population;
 
-        Loader loader = new Loader();
-        this.hitboxMap = loader.loadHitboxMap("/img/hitbox_map.png", (int)canvas.getWidth(), (int) canvas.getHeight() );
+        Car.hitbox = new Loader().
+                loadHitboxMap(
+                        "/img/hitbox_map.png",
+                        canvas.getWidth(), canvas.getHeight() );
 
         ImageView circuit = new ImageView();
         circuit.setX( 0 );
@@ -55,64 +69,85 @@ public class Circuit extends StackPane
         getChildren().addAll( circuit, canvas );
         genCars();
 
-        // setOnKeyPressed( keyEvent -> Input.handleKeyPressed(cars.get( 0 ), keyEvent) );
-        //setOnKeyReleased( keyEvent -> Input.handleKeyReleased(cars.get( 0 ), keyEvent) );
+        setOnKeyPressed( keyEvent -> Input.handleKeyPressed(cars.get( 0 ), keyEvent) );
+        setOnKeyReleased( keyEvent -> Input.handleKeyReleased(cars.get( 0 ), keyEvent) );
+
         setOnMouseClicked( mouseEvent -> canvas.requestFocus() );
         canvas.requestFocus();
     }
 
-    private void addCar()
+    private void addCarToCircuit(ImageView img)
     {
-        Car car = new Car(hitboxMap, ARROWS, false);
-        cars.add( car );
-        setAlignment(car.getImgView(), Pos.TOP_LEFT);
-        getChildren().add( car.getImgView() );
+        setAlignment( img, Pos.TOP_LEFT );
+        getChildren().add( img );
     }
 
-    // SET CARS AND NNs
     public void genCars()
     {
-        cars.clear();
-        genetic.clear();
-
         for (int i = 0; i < population; i++)
         {
-            addCar();
-            genetic.createNN();
+            IACar car = new IACar();
+            cars.add( car );
+            addCarToCircuit( car.getCarImgView() );
         }
-
     }
 
     public void nextGeneration( int newPopulation )
     {
-        // remove the cars from the screen
-        getChildren().remove( 2, 2 + cars.size() );
-
-        List<Integer> parents = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
         // the selected cars become the parents of the next generation
         for (int i = 0; i < population; i++) {
-            if ( cars.get( i ).isSelected() ) {
-                parents.add( i );
+            Car car = cars.get( i );
+            if ( car.isSelected() )
+            {
+                indices.add( i );
+                car.resetCar();
+                car.setParent( true );
             }
         }
 
-        // clear all cars from the list and reconstruct them
-        cars.clear();
-        for (int i = 0; i < newPopulation; i++) { addCar(); }
+        // apply crossovers and mutations
+        genetic.nextGeneration( cars, indices, newPopulation );
 
-        // do the crossover and mutation -> children
-        genetic.nextGeneration( parents, newPopulation );
-        generation += 1;
+        // if new population < old population, remove unnecessary cars
+        if ( newPopulation < population )
+        {
+            cars.subList( newPopulation, population ).clear();
+            getChildren().remove( newPopulation + 2, population + 2 );
+        }
+        // if the new population is bigger, add the new cars to the circuit
+        else if ( newPopulation > population )
+            for ( int i = population; i < newPopulation; i++ )
+                addCarToCircuit(cars.get( i ).getCarImgView());
+
         this.population = newPopulation;
+        generation += 1;
     }
 
     public void update(float deltaTime)
     {
+        if (USER_CONTROL)
+        {
+            // cars.get( 0 ).update( deltaTime );
+            // Matrix2d x = cars.get( 0 ).getCarData();
+            Vector2d y = Input.getVector();
+            // positions.add( x );
+            controls.add( y.copy() );
+            if (positions.size() > 3500)
+            {
+                Loader.saveDrivingData( positions, controls );
+                System.out.println("SAVED");
+                positions.clear();
+                controls.clear();
+            }
+            return;
+        }
+
         double speed = 0;
         for (int i = 0; i < population; i++)
         {
-            Car car = cars.get( i );
-            Matrix2d output = genetic.simulateNN( i, car.getCarData() );
+            IACar car = cars.get( i );
+            Matrix2d output = car.simulate();
             double throttle = output.getAt( 0, 0 );
             double turn = output.getAt( 0, 1 );
             car.accelerate( throttle );
@@ -127,7 +162,7 @@ public class Circuit extends StackPane
     {
         ctx.clearRect( 0, 0, canvas.getWidth(), canvas.getHeight() );
 
-        for (Car car: cars)
+        for (IACar car: cars)
             car.render(ctx);
     }
 

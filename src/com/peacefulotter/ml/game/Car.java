@@ -19,7 +19,8 @@ public class Car
     private static final int CAR_POSITION_Y = 480;
     private static final int CAR_ANGLE = -55;
 
-    private static final double MAX_SPEED = 1.5;
+    private static final double CONTROLS_EASE = 6;
+    private static final double MAX_SPEED = 2.5;
     private static final double SLOWNESS = 0.1;
     private static final double ACCELERATION_FACTOR = 0.2;
     private static final double BRAKING_FACTOR = 0.3;
@@ -27,22 +28,22 @@ public class Car
 
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( CAR_WIDTH / 2f, CAR_HEIGHT / 2f );
 
-    private static final ColorAdjust SELECTED_COLOR = new ColorAdjust(8, 1, 0.9, 1);
-    private static final ColorAdjust DEAD_COLOR = new ColorAdjust(1, 1, 0.2, 1);
+    private static final ColorAdjust SELECTED_COLOR = new ColorAdjust(0.6, 1, 0.5, 1);
+    private static final ColorAdjust DEAD_COLOR = new ColorAdjust(0.95, 0.2, 0.1,  0.4);
+    private static final ColorAdjust PARENT_COLOR = new ColorAdjust(-0.6, 0.7, 0.4, 1);
+
+    public static Matrix2d hitbox;
 
     private final ImageView car;
-
-    private final Matrix2d hitbox;
-    private final List<Arrow> arrows;
     private final boolean drawArrows;
+    protected final List<Arrow> arrows;
 
-    private double speed, acceleration, angle, angleSpeed;
     private Vector2d position, direction;
-    private boolean alive, selected;
+    protected double speed, acceleration, angle, angleSpeed;
+    private boolean alive, selected, isParent;
 
-    public Car( Matrix2d hitbox, int nbArrows, boolean drawArrows)
+    public Car( int nbArrows, boolean drawArrows)
     {
-        this.hitbox = hitbox;
         this.arrows = new ArrayList<>();
         this.drawArrows = drawArrows;
 
@@ -55,6 +56,7 @@ public class Car
 
         this.alive = true;
         this.selected = false;
+        this.isParent = false;
 
         int baseAngle = -90;
         int shiftAngle = -2 * baseAngle / (nbArrows - 1);
@@ -71,24 +73,32 @@ public class Car
         updatePos();
     }
 
-    // arrows length, speed, angle, angleSpeed
-    public Matrix2d getCarData()
+    public void resetCar()
     {
-        int nbArrows = arrows.size();
-        Matrix2d data = new Matrix2d( 1, Genetic.DIMENSIONS[0] );
-        for (int i = 0; i < nbArrows; i++)
-            data.setAt( 0, i, arrows.get( i ).getLength() );
-        data.setAt( 0, nbArrows, speed );
-        data.setAt( 0, nbArrows + 1, acceleration );
-        data.setAt( 0, nbArrows + 2, angle );
-        data.setAt( 0, nbArrows + 3, angleSpeed );
-        return data.normalize();
+        speed = 0;
+        acceleration = 0;
+        angle = CAR_ANGLE;
+        angleSpeed = 0;
+        position = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
+        direction = new Vector2d( 1, 0 ).rotate( angle );
+        alive = true;
+        selected = false;
+        isParent = false;
     }
 
-    public ImageView getImgView()
+    public ImageView getCarImgView()
     {
         return car;
     }
+    public boolean isSelected() { return selected; }
+    public double getSpeed()
+    {
+        if (!alive) { return 0; }
+        return speed;
+    }
+
+    public void setParent(boolean isParent) { this.isParent = isParent; }
+
 
     private boolean checkHitbox()
     {
@@ -122,15 +132,14 @@ public class Car
     public void update(float deltaTime)
     {
         if (!alive) return;
-
-        double newSpeed = speed + (acceleration - SLOWNESS) * deltaTime;
+        double newSpeed = speed + (acceleration - SLOWNESS) * deltaTime * CONTROLS_EASE;
         if (newSpeed <= MAX_SPEED && newSpeed >= 0)
             speed = newSpeed;
 
         if (angleSpeed != 0)
         {
-            direction = direction.rotate( angleSpeed );
-            angle += angleSpeed;
+            direction = direction.rotate( angleSpeed * CONTROLS_EASE );
+            angle += angleSpeed * CONTROLS_EASE;
             this.car.setRotate( angle );
         }
 
@@ -138,16 +147,17 @@ public class Car
         updatePos();
 
         for ( Arrow arrow: arrows )
-            arrow.updateParams( position.add( SHIFT_ORIGIN ), angleSpeed );
+            arrow.updateParams( position.add( SHIFT_ORIGIN ), angle );
 
         alive = checkHitbox();
     }
 
     public void render( GraphicsContext ctx )
     {
-        if (selected)
-        {
+        if (selected) {
             car.setEffect( SELECTED_COLOR );
+        } else if (isParent) {
+            car.setEffect( PARENT_COLOR );
         } else if (!alive) {
             car.setEffect( DEAD_COLOR );
         } else {
@@ -157,11 +167,5 @@ public class Car
         if (drawArrows)
             for (Arrow arrow: arrows)
                 arrow.draw( ctx );
-    }
-
-    public boolean isSelected() { return selected; }
-    public double getSpeed() {
-        if (!alive) { return 0; }
-        return speed;
     }
 }

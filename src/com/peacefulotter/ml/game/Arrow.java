@@ -9,13 +9,15 @@ public class Arrow
 {
     private Matrix2d hitbox;
     private Vector2d direction, origin;
-    private int length;
+    private double innerAngle;
+    private int length = 1;
 
-    public Arrow( Matrix2d hitbox, Vector2d direction, double angle )
+    public Arrow( Matrix2d hitbox, Vector2d direction, double innerAngle )
     {
         this.hitbox = hitbox;
-        this.direction = direction.rotate( angle );
+        this.direction = direction.rotate( innerAngle );
         this.origin = new Vector2d( 0, 0 );
+        this.innerAngle = innerAngle;
     }
 
     private void getWallPoint(int length, int padding)
@@ -38,10 +40,10 @@ public class Arrow
             getWallPoint( length - padding / 2, padding / 2 );
     }
 
-    public void updateParams(Vector2d origin, double angleSpeed )
+    public void updateParams(Vector2d origin, double angle )
     {
-        this.origin = new Vector2d( origin.getX(), origin.getY() );
-        this.direction = direction.rotate( angleSpeed );
+        this.origin = origin.copy();
+        this.direction = new Vector2d( 1, 0 ).rotate( angle + innerAngle );
         getWallPoint( 1, 20 );
     }
 

@@ -115,7 +115,13 @@ public class Vector2d
         if ( !( other instanceof Vector2d ) ) return false;
         Vector2d vec = (Vector2d) other;
         return  x == vec.getX() &&
-                y == vec.getY();}
+                y == vec.getY();
+    }
+
+    public Vector2d copy()
+    {
+        return new Vector2d( x, y );
+    }
 
     @Override
     public String toString()

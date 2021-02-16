@@ -1,111 +1,90 @@
 package com.peacefulotter.ml.ia;
 
-import com.peacefulotter.ml.ia.activation.ActivationFunc;
-import com.peacefulotter.ml.ia.activation.Activations;
 import com.peacefulotter.ml.maths.Matrix2d;
-
+import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+
 public class Genetic
 {
-    private static final double CROSSOVER_RATE = 0.5d;
-    private static final double MUTATION_INTENSITY = 2d;
-    private static final double MUTATION_RATE = 0.03d;
+    private final SpinnerValueFactory<Double> crossRate, mutStrength, mutRate;
 
-    public static final int[] DIMENSIONS = new int[] {9, 20, 2};
-    private static final ActivationFunc[] ACTIVATIONS = new ActivationFunc[] {
-            Activations.ReLU, Activations.HyperTan
-    };
-
-    private final List<NeuralNetwork> nnList;
-
-    public Genetic()
+    public Genetic( SpinnerValueFactory<Double> crossRate,
+                    SpinnerValueFactory<Double> mutStrength,
+                    SpinnerValueFactory<Double> mutRate )
     {
-        this.nnList = new ArrayList<>();
+        this.crossRate = crossRate;
+        this.mutStrength = mutStrength;
+        this.mutRate = mutRate;
     }
 
-    public void clear() { nnList.clear(); }
-
-    public void createNN()
+    public void nextGeneration( List<IACar> cars, List<Integer> indices, int newPopulation )
     {
-        NeuralNetwork nn = new NeuralNetwork( DIMENSIONS, ACTIVATIONS );
-        nnList.add(nn);
-    }
-
-
-    public Matrix2d simulateNN( int i, Matrix2d data )
-    {
-        return nnList.get( i ).predict( data );
-    }
-
-    public void nextGeneration( List<Integer> indices, int newPopulation )
-    {
-        // Crossover - parents + crossover parents
-        List<NeuralNetwork> parents = new ArrayList<>();
-        for (Integer i: indices)
-            parents.add( nnList.get( i ) );
-        for (int i = 0; i < indices.size() - 1; i++)
-            parents.add( crossover(nnList.get(indices.get(i)), nnList.get(indices.get(i + 1))) );
-        System.out.println(parents.size() + " parent(s) after crossover");
-
-        // Mutation - parents + mutated children
-        nnList.clear();
-        for (NeuralNetwork parent: parents)
+        // Crossover -> add parents + crossover parents
+        // List<IACar> parents = new ArrayList<>();
+        // for (Integer i: indices)
+        //     parents.add( cars.get( i ) );
+        /*for (int i = 0; i < indices.size() - 1; i++)
         {
-            nnList.add( parent );
-            for (int i = 0; i < newPopulation / parents.size(); i++)
+            IACar crossCar = crossover(
+                    cars.get(indices.get(i)),
+                    cars.get(indices.get(i + 1)));
+            parents.add( crossCar );
+        }*/
+        System.out.println(indices.size() + " parent(s) after crossover");
+
+        // Mutation -> add mutated children to the population
+        int j = 0;
+        int oldPopulation = cars.size();
+        for ( int i = 0; i < newPopulation; i++ )
+        {
+            if ( i % (newPopulation / indices.size()) == 0 && j < indices.size() )
+                j++;
+            if ( indices.contains( i ) )
+                continue;
+            NeuralNetwork mutatedNN = mutate( cars.get( indices.get( j - 1 ) ) );
+            if ( i < oldPopulation)
             {
-                nnList.add( mutate( parent ) );
+                cars.get( i ).resetCar();
+                cars.get( i ).setNN( mutatedNN );
             }
-        }
-        for (int i = 0; i < newPopulation % parents.size(); i++)
-        {
-            nnList.add( mutate( parents.get( 0 ) ) );
+            else
+                cars.add( new IACar( mutatedNN ) );
         }
     }
 
 
-    private static Matrix2d crossing( Matrix2d a, Matrix2d b )
-    {
-        if ( Math.random() < CROSSOVER_RATE )
-            return a.plus(b).div(2);
-        else
-            return a;
-    }
-
-    public static NeuralNetwork crossover(NeuralNetwork nn1, NeuralNetwork nn2)
-    {
-        NeuralNetwork nn = new NeuralNetwork(DIMENSIONS, ACTIVATIONS);
-        for (int i = 1; i < DIMENSIONS.length; i++)
-        {
-            nn.setW( i, crossing(nn1.getW(i), nn2.getW(i)) );
-            nn.setB( i, crossing(nn1.getB(i), nn2.getB(i)) );
-        }
-        return nn;
-    }
-
-
-    private static Matrix2d mutation( Matrix2d a )
+    private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if (Math.random() < MUTATION_RATE)
-                mat.setAt(i, j, a.getAt( i, j ) + MUTATION_INTENSITY * (new Random().nextDouble() - 0.5f) );
+            if (Math.random() < crossRate.getValue())
+                return (a.getAt(i,j) + b.getAt(i,j)) / 2d;
             else
-                mat.setAt( i, j, a.getAt( i, j ) );
+                return a.getAt( i, j );
         } );
     }
 
-    public static NeuralNetwork mutate( NeuralNetwork parent )
+    public NeuralNetwork crossover(IACar car1, IACar car2)
     {
-        NeuralNetwork nn = new NeuralNetwork(DIMENSIONS, ACTIVATIONS);
-        for (int i = 1; i < DIMENSIONS.length; i++)
-        {
-            nn.setW(i, mutation( parent.getW(i) ));
-            nn.setB(i, mutation( parent.getB(i) ));
-        }
-        return nn;
+        return car1.applyNNFunction( this::crossing, car2 );
+    }
+
+
+    private Matrix2d mutation( Matrix2d a )
+    {
+        return a.applyFunc( (mat, i, j) -> {
+            if (Math.random() < mutRate.getValue())
+                return a.getAt( i, j ) + mutStrength.getValue() * (new Random().nextDouble() - 0.5f);
+            else
+                return a.getAt( i, j );
+        } );
+    }
+
+    public NeuralNetwork mutate( IACar parent )
+    {
+        return parent.applyNNFunction( this::mutation );
     }
 }
