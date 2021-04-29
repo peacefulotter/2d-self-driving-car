@@ -1,3 +1,6 @@
+(go to the master branch to see the code)
+(the readme is outdated since more work has been put into this project and results have improved / changed. It is still kind of relevant though)
+
 # How does it work ?
 Each car is assigned a neural network and has 5 "arrows" (lines from the center of the car to the nearest wall at a certain angle).
 At each update the nn is fed with 9 inputs: length of each arrow (5), speed, acceleration, angle and angle speed
