@@ -102,6 +102,7 @@ public class Circuit
                 addCarToMap(cars.get( i ).getCarImgView());
 
         generation += 1;
+        population = newPopulation;
     }
 
     protected void update(float deltaTime, int from, int to)

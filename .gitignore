@@ -27,3 +27,4 @@ out/
 test/
 /libs/
 *.iml
+*.xml

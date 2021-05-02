@@ -56,7 +56,10 @@ public class MultiThreadCircuit extends Circuit
         }
     }
 
-    public MultiThreadCircuit( Map map, int population, SpinnerValueFactory<Double> crossRate, SpinnerValueFactory<Double> mutStrength, SpinnerValueFactory<Double> mutRate )
+    public MultiThreadCircuit( Map map, int population,
+                               SpinnerValueFactory<Double> crossRate,
+                               SpinnerValueFactory<Double> mutStrength,
+                               SpinnerValueFactory<Double> mutRate )
     {
         super( map, population, crossRate, mutStrength, mutRate );
 
