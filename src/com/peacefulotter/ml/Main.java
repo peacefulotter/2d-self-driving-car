@@ -1,7 +1,6 @@
 package com.peacefulotter.ml;
 
-import com.peacefulotter.ml.game.Circuit;
-import com.peacefulotter.ml.game.GameLoop;
+import com.peacefulotter.ml.game.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,8 +12,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-
-
 public class Main extends Application
 {
     private static final int CIRCUIT_WIDTH = 1080;
@@ -22,7 +19,10 @@ public class Main extends Application
     private static final int MIN_CANVAS_WIDTH = CIRCUIT_WIDTH;
     private static final int MIN_CANVAS_HEIGHT = CIRCUIT_HEIGHT + 120;
 
-    private static final int ORIGINAL_POPULATION = 600;
+    private static final int ORIGINAL_POPULATION = 3000;
+    private static final int MAX_POPULATION = 4000;
+    private static final int MIN_POPULATION = 100;
+
     private static final double CROSSOVER_RATE = 0.1d;
     private static final double MUTATION_STRENGTH = 2d;
     private static final double MUTATION_RATE = 0.030d;
@@ -43,15 +43,16 @@ public class Main extends Application
     public void start( Stage window ) throws Exception
     {
         Canvas canvas = new Canvas( CIRCUIT_WIDTH, CIRCUIT_HEIGHT );
-        this.circuit = new Circuit(
-                canvas, ORIGINAL_POPULATION,
+        Map map = new Map(canvas);
+        // if you want a single thread circuit replace MultiThreadCircuit by Circuit (change also the population to a reasonable amount)
+        this.circuit = new MultiThreadCircuit( map, ORIGINAL_POPULATION,
                 crossoverSpinner.getValueFactory(),
                 mutIntensitySpinner.getValueFactory(),
                 muteRateSpinner.getValueFactory());
         GameLoop loop = new GameLoop(circuit);
 
         BorderPane wrapper = new BorderPane();
-        wrapper.setTop( circuit );
+        wrapper.setTop( map );
         wrapper.setBottom( buildBottomTab() );
         window.setMinWidth( MIN_CANVAS_WIDTH );
         window.setMinHeight( MIN_CANVAS_HEIGHT );
@@ -69,7 +70,7 @@ public class Main extends Application
         Label crossoverLabel = new Label( "Crossover rate" );
         Label mutStrengthLabel = new Label( "Mutation Strength" );
         Label mutRateLabel = new Label( "Mutation rate" );
-        Spinner<Integer> populationSpinner = new Spinner<>(5, 1000, ORIGINAL_POPULATION, 5);
+        Spinner<Integer> populationSpinner = new Spinner<>(MIN_POPULATION, MAX_POPULATION, ORIGINAL_POPULATION, 10);
 
         Button nextGenButton = new Button( "Next Gen" );
         Label genLabel = new Label( "Generation 1" );

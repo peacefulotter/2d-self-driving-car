@@ -7,9 +7,10 @@ import javafx.scene.paint.Color;
 
 public class Arrow
 {
-    private Matrix2d hitbox;
+    private final Matrix2d hitbox;
+    private final double innerAngle;
+
     private Vector2d direction, origin;
-    private double innerAngle;
     private int length = 1;
 
     public Arrow( Matrix2d hitbox, Vector2d direction, double innerAngle )

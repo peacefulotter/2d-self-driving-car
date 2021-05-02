@@ -1,0 +1,4 @@
+- add states for the car
+- (better collision detection)
+- average speed is wrong in multi threading
+- create a Settings class

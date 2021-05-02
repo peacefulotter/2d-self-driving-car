@@ -25,7 +25,7 @@ public class IACar extends Car
 
     public IACar()
     {
-        super(ARROWS, true);
+        super(ARROWS, false);
         this.nn = new NeuralNetwork( DIMENSIONS, ACTIVATIONS );
     }
 

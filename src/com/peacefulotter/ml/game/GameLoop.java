@@ -6,7 +6,7 @@ import javafx.animation.AnimationTimer;
 
 public class GameLoop extends AnimationTimer
 {
-    private static final double FRAMES_CAP = 60;
+    private static final double FRAMES_CAP = 120;
     private static final double FRAME_TIME = 1.0 / FRAMES_CAP;
 
     private final Circuit circuit;

@@ -69,8 +69,6 @@ public class Car
         Image img = new Image( "/img/car.png", CAR_WIDTH, CAR_HEIGHT, true, false );
         this.car = new ImageView( img );
         this.car.setOnMouseClicked( (event) -> selected = !selected );
-
-        updatePos();
     }
 
     public void resetCar()
@@ -122,13 +120,6 @@ public class Car
         angleSpeed = angle * TURN_DEGREE;
     }
 
-    private void updatePos()
-    {
-        car.setTranslateX( position.getX() );
-        car.setTranslateY( position.getY() );
-        car.setRotate( angle );
-    }
-
     public void update(float deltaTime)
     {
         if (!alive) return;
@@ -140,11 +131,9 @@ public class Car
         {
             direction = direction.rotate( angleSpeed * CONTROLS_EASE );
             angle += angleSpeed * CONTROLS_EASE;
-            this.car.setRotate( angle );
         }
 
         position = position.add( direction.mul( speed ) );
-        updatePos();
 
         for ( Arrow arrow: arrows )
             arrow.updateParams( position.add( SHIFT_ORIGIN ), angle );
@@ -163,6 +152,10 @@ public class Car
         } else {
             car.setEffect( null );
         }
+
+        car.setTranslateX( position.getX() );
+        car.setTranslateY( position.getY() );
+        car.setRotate( angle );
 
         if (drawArrows)
             for (Arrow arrow: arrows)

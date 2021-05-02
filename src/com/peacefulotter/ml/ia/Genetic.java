@@ -3,7 +3,6 @@ package com.peacefulotter.ml.ia;
 import com.peacefulotter.ml.maths.Matrix2d;
 import javafx.scene.control.SpinnerValueFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
