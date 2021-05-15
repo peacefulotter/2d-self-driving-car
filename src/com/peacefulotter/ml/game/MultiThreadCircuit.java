@@ -8,7 +8,9 @@ import java.util.List;
 
 public class MultiThreadCircuit extends Circuit
 {
-    private static final int THREADS = Runtime.getRuntime().availableProcessors(); // nb of threads
+    // FIXME: add a thread reduce value because having as many threads as cores is too much (to test)
+    private static final int THREAD_REDUCE = 0;
+    public static final int THREADS = Runtime.getRuntime().availableProcessors() - THREAD_REDUCE; // nb of threads
 
     private final List<ThreadedCircuit> threadedCircuits;
 

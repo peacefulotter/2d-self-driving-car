@@ -12,6 +12,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
+import static com.peacefulotter.ml.game.MultiThreadCircuit.THREADS;
+
 public class Main extends Application
 {
     private static final int CIRCUIT_WIDTH = 1080;
@@ -19,9 +21,9 @@ public class Main extends Application
     private static final int MIN_CANVAS_WIDTH = CIRCUIT_WIDTH;
     private static final int MIN_CANVAS_HEIGHT = CIRCUIT_HEIGHT + 120;
 
-    private static final int ORIGINAL_POPULATION = 3000;
-    private static final int MAX_POPULATION = 4000;
-    private static final int MIN_POPULATION = 100;
+    private static final int ORIGINAL_POPULATION = 375 * THREADS;
+    private static final int MAX_POPULATION = ORIGINAL_POPULATION * 2;
+    private static final int MIN_POPULATION = ORIGINAL_POPULATION / 4;
 
     private static final double CROSSOVER_RATE = 0.1d;
     private static final double MUTATION_STRENGTH = 2d;
@@ -44,7 +46,8 @@ public class Main extends Application
     {
         Canvas canvas = new Canvas( CIRCUIT_WIDTH, CIRCUIT_HEIGHT );
         Map map = new Map(canvas);
-        // if you want a single thread circuit replace MultiThreadCircuit by Circuit (change also the population to a reasonable amount)
+        // if you want to run the circuit on a single thread, replace MultiThreadCircuit by Circuit (change also the population to a reasonable amount)
+        System.out.println("Working on " + THREADS + " threads");
         this.circuit = new MultiThreadCircuit( map, ORIGINAL_POPULATION,
                 crossoverSpinner.getValueFactory(),
                 mutIntensitySpinner.getValueFactory(),
@@ -70,7 +73,7 @@ public class Main extends Application
         Label crossoverLabel = new Label( "Crossover rate" );
         Label mutStrengthLabel = new Label( "Mutation Strength" );
         Label mutRateLabel = new Label( "Mutation rate" );
-        Spinner<Integer> populationSpinner = new Spinner<>(MIN_POPULATION, MAX_POPULATION, ORIGINAL_POPULATION, 10);
+        Spinner<Integer> populationSpinner = new Spinner<>(MIN_POPULATION, MAX_POPULATION, ORIGINAL_POPULATION, THREADS);
 
         Button nextGenButton = new Button( "Next Gen" );
         Label genLabel = new Label( "Generation 1" );
@@ -86,7 +89,7 @@ public class Main extends Application
 
         nextGenButton.setOnMouseClicked( event -> {
             circuit.nextGeneration(populationSpinner.getValue());
-            genLabel.setText( "Generation " + circuit.getGeneration() );
+            genLabel.setText( "Generation " + (circuit.getGeneration() + 1) );
         } );
         circuit.getAverageSpeed().addListener( (elt, o, n) ->
                 averageSpeed.setText( "Average Speed: " + String.format("%1$,.2f", n.doubleValue() * 100) ) );
@@ -101,7 +104,7 @@ public class Main extends Application
                 mutRateLabel, muteRateSpinner );
         HBox bottom = new HBox();
         bottom.setAlignment(Pos.CENTER_LEFT);
-        bottom.getChildren().addAll( nextGenButton, genLabel, averageSpeed, FPS_LABEL );
+        bottom.getChildren().addAll( nextGenButton, genLabel, FPS_LABEL, averageSpeed );
 
         pane.setTop( top );
         pane.setBottom( bottom );

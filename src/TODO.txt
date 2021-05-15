@@ -2,3 +2,4 @@
 - (better collision detection)
 - average speed is wrong in multi threading
 - create a Settings class
+- /!\ POPULATION needs to be a multiple of THREADS

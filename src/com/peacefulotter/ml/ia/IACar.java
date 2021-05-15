@@ -14,27 +14,32 @@ import java.util.function.Function;
 
 public class IACar extends Car
 {
+    // Neural Network specifications (hyper parameters)
     public static final int[] DIMENSIONS = new int[] {7, 20, 2};
     private static final ActivationFunc[] ACTIVATIONS = new ActivationFunc[] {
             Activations.ReLU, Activations.HyperTan
     };
     private static final int ARROWS = 5;
-
+    private static final boolean DRAW_ARROWS = false;
 
     private NeuralNetwork nn;
 
     public IACar()
     {
-        super(ARROWS, false);
+        super( ARROWS, DRAW_ARROWS );
         this.nn = new NeuralNetwork( DIMENSIONS, ACTIVATIONS );
     }
 
     public IACar( NeuralNetwork nn )
     {
-        super(ARROWS,true);
+        super( ARROWS,DRAW_ARROWS );
         this.nn = nn;
     }
 
+    /**
+     * Simulates the NeuralNetwork
+     * @return the prediction of the neural network
+     */
     public Matrix2d simulate()
     {
         Matrix2d data = new Matrix2d( 1, DIMENSIONS[0] );

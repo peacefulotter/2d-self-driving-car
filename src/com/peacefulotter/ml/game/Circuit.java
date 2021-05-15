@@ -66,29 +66,30 @@ public class Circuit
 
     public void nextGeneration( int newPopulation )
     {
-        List<Integer> indices = new ArrayList<>();
+        List<Integer> parentsIndex = new ArrayList<>();
         // the selected cars become the parents of the next generation
         for (int i = 0; i < population; i++) {
             Car car = cars.get( i );
             if ( car.isSelected() )
             {
-                indices.add( i );
+                parentsIndex.add( i );
                 car.resetCar();
                 car.setParent( true );
             }
         }
 
-        if ( indices.size() == 0 )
+        int parentsSize = parentsIndex.size();
+        if ( parentsSize == 0 )
         {
             System.out.println( "No parent selected, aborting next generation");
             return;
-        } else if ( indices.size() < DIVERSITY_THRESHOLD )
+        } else if ( parentsSize < DIVERSITY_THRESHOLD )
         {
-            System.out.println( "You only have selected " + indices.size() + " parent(s), this might lead to poor diversity and thus long or no training in the long run");
+            System.out.println( "You only have selected " + parentsSize + " parent(s), this might lead to poor diversity and thus long or no training in the long run");
         }
 
         // apply crossovers and mutations
-        genetic.nextGeneration( cars, indices, newPopulation );
+        genetic.nextGeneration( parentsIndex, cars, newPopulation );
 
         // if new population < old population, remove unnecessary cars
         if ( newPopulation < population )
@@ -102,7 +103,7 @@ public class Circuit
                 addCarToMap(cars.get( i ).getCarImgView());
 
         generation += 1;
-        population = newPopulation;
+        population = cars.size();
     }
 
     protected void update(float deltaTime, int from, int to)
@@ -126,6 +127,10 @@ public class Circuit
         for (int i = from; i < to; i++)
         {
             IACar car = cars.get( i );
+            if ( car.isDead() ) {
+                car.partialReset();
+                continue;
+            }
             Matrix2d output = car.simulate();
             double throttle = output.getAt( 0, 0 );
             double turn = output.getAt( 0, 1 );

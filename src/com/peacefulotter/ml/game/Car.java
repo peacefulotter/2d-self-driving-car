@@ -26,11 +26,15 @@ public class Car
     private static final double BRAKING_FACTOR = 0.3;
     private static final double TURN_DEGREE = 0.15;
 
+    private static final Vector2d DEFAULT_POSITION = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
+    private static final Vector2d DEFAULT_DIRECTION = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( CAR_WIDTH / 2f, CAR_HEIGHT / 2f );
 
-    private static final ColorAdjust SELECTED_COLOR = new ColorAdjust(0.6, 1, 0.5, 1);
-    private static final ColorAdjust DEAD_COLOR = new ColorAdjust(0.95, 0.2, 0.1,  0.4);
-    private static final ColorAdjust PARENT_COLOR = new ColorAdjust(-0.6, 0.7, 0.4, 1);
+    private static final ColorAdjust SELECTED_COLOR = new ColorAdjust( 0.6, 1, 0.5, 1 );
+    private static final ColorAdjust DEAD_COLOR = new ColorAdjust( 0.95, 0.2, 0.1, 0.4 );
+    private static final ColorAdjust PARENT_COLOR = new ColorAdjust( -0.6, 0.7, 0.4, 1 );
+
+    private static final Image CAR_IMG = new Image( "/img/car.png", CAR_WIDTH, CAR_HEIGHT, true, false );
 
     public static Matrix2d hitbox;
 
@@ -42,92 +46,114 @@ public class Car
     protected double speed, acceleration, angle, angleSpeed;
     private boolean alive, selected, isParent;
 
-    public Car( int nbArrows, boolean drawArrows)
+    public Car( int nbArrows, boolean drawArrows )
     {
         this.arrows = new ArrayList<>();
         this.drawArrows = drawArrows;
 
-        this.speed = 0;
-        this.acceleration = 0;
-        this.position = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
-        this.direction = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
-        this.angle = CAR_ANGLE;
-        this.angleSpeed = 0;
-
-        this.alive = true;
-        this.selected = false;
-        this.isParent = false;
-
+        // initialize the 5 arrows
         int baseAngle = -90;
-        int shiftAngle = -2 * baseAngle / (nbArrows - 1);
-        for (int i = 0; i < nbArrows; i++)
+        int shiftAngle = -2 * baseAngle / ( nbArrows - 1 );
+        for ( int i = 0; i < nbArrows; i++ )
         {
             int angle = baseAngle + i * shiftAngle;
-            this.arrows.add( new Arrow( hitbox, direction, angle ) );
+            this.arrows.add( new Arrow( hitbox, DEFAULT_DIRECTION, angle ) );
         }
 
-        Image img = new Image( "/img/car.png", CAR_WIDTH, CAR_HEIGHT, true, false );
-        this.car = new ImageView( img );
-        this.car.setOnMouseClicked( (event) -> selected = !selected );
+        // initialize the car image
+        this.car = new ImageView( CAR_IMG );
+        this.car.setOnMouseClicked( ( event ) -> {
+            selected = !selected;
+            // if ( selected ) car.setEffect( SELECTED_COLOR );
+            // else car.setEffect( null );
+        } );
+
+        resetCar();
     }
 
-    public void resetCar()
+    /**
+     * Resets speed, acceleration and angle speed
+     */
+    public void partialReset()
     {
         speed = 0;
         acceleration = 0;
-        angle = CAR_ANGLE;
         angleSpeed = 0;
-        position = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
-        direction = new Vector2d( 1, 0 ).rotate( angle );
+    }
+
+    /**
+     * Fully resets the car to its default state
+     */
+    public void resetCar()
+    {
+        partialReset();
+        angle = CAR_ANGLE;
+        position = DEFAULT_POSITION;
+        direction = DEFAULT_DIRECTION;
         alive = true;
         selected = false;
         isParent = false;
+        car.setOpacity(1);
+        car.setEffect( null );
     }
 
     public ImageView getCarImgView()
     {
         return car;
     }
-    public boolean isSelected() { return selected; }
+
+    public boolean isSelected()
+    {
+        return selected;
+    }
+
     public double getSpeed()
     {
-        if (!alive) { return 0; }
+        if ( !alive )
+        {
+            return 0;
+        }
         return speed;
     }
 
-    public void setParent(boolean isParent) { this.isParent = isParent; }
+    public void setParent( boolean isParent )
+    {
+        this.isParent = isParent;
+        // if ( isParent ) car.setEffect( PARENT_COLOR );
+    }
 
 
     private boolean checkHitbox()
     {
         Vector2d center = position.add( SHIFT_ORIGIN );
-        int x = (int) center.getX(); int y = (int) center.getY();
-        if (x < 0 || x >= hitbox.cols || y < 0 || y >= hitbox.rows)
+        int x = (int) center.getX();
+        int y = (int) center.getY();
+        if ( x < 0 || x >= hitbox.cols || y < 0 || y >= hitbox.rows )
             return false;
         return hitbox.getAt( y, x ) == 1;
     }
 
-    public void accelerate(double acc)
+    public void accelerate( double acc )
     {
-        if (acc > 0)
+        if ( acc > 0 )
             acceleration = acc * ACCELERATION_FACTOR;
         else
             acceleration = acc * BRAKING_FACTOR;
     }
 
-    public void turn(double angle)
+    public void turn( double angle )
     {
         angleSpeed = angle * TURN_DEGREE;
     }
 
-    public void update(float deltaTime)
+    public void update( float deltaTime )
     {
-        if (!alive) return;
-        double newSpeed = speed + (acceleration - SLOWNESS) * deltaTime * CONTROLS_EASE;
-        if (newSpeed <= MAX_SPEED && newSpeed >= 0)
+        if ( !alive ) return;
+        double newSpeed = speed + ( acceleration - SLOWNESS ) * deltaTime * CONTROLS_EASE;
+        if ( newSpeed <= MAX_SPEED && newSpeed >= 0 )
             speed = newSpeed;
 
-        if (angleSpeed != 0)
+        if ( angleSpeed != 0 )
         {
             direction = direction.rotate( angleSpeed * CONTROLS_EASE );
             angle += angleSpeed * CONTROLS_EASE;
@@ -135,30 +161,38 @@ public class Car
 
         position = position.add( direction.mul( speed ) );
 
-        for ( Arrow arrow: arrows )
+        for ( Arrow arrow : arrows )
             arrow.updateParams( position.add( SHIFT_ORIGIN ), angle );
 
         alive = checkHitbox();
+        if ( !alive ) {
+            // if (!selected) car.setEffect( DEAD_COLOR );
+            car.setOpacity(0.4);
+        }
     }
 
     public void render( GraphicsContext ctx )
     {
-        if (selected) {
+        if ( selected )
             car.setEffect( SELECTED_COLOR );
-        } else if (isParent) {
+        else if ( isParent )
             car.setEffect( PARENT_COLOR );
-        } else if (!alive) {
+        else if ( !alive )
             car.setEffect( DEAD_COLOR );
-        } else {
+        else
             car.setEffect( null );
-        }
 
         car.setTranslateX( position.getX() );
         car.setTranslateY( position.getY() );
         car.setRotate( angle );
 
-        if (drawArrows)
-            for (Arrow arrow: arrows)
+        if ( drawArrows )
+            for ( Arrow arrow : arrows )
                 arrow.draw( ctx );
+    }
+
+    public boolean isDead()
+    {
+        return !alive;
     }
 }
