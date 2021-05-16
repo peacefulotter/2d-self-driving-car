@@ -44,7 +44,7 @@ public class Car
 
     private Vector2d position, direction;
     protected double speed, acceleration, angle, angleSpeed;
-    private boolean alive, selected, isParent;
+    private boolean alive, selected, isParent, isReset;
 
     public Car( int nbArrows, boolean drawArrows )
     {
@@ -64,8 +64,10 @@ public class Car
         this.car = new ImageView( CAR_IMG );
         this.car.setOnMouseClicked( ( event ) -> {
             selected = !selected;
+            Circuit.addSelectedParent(selected ? 1 : -1);
+
             // if ( selected ) car.setEffect( SELECTED_COLOR );
-            // else car.setEffect( null );
+            // else  car.setEffect( null );
         } );
 
         resetCar();
@@ -79,6 +81,7 @@ public class Car
         speed = 0;
         acceleration = 0;
         angleSpeed = 0;
+        isReset = true;
     }
 
     /**
@@ -87,14 +90,18 @@ public class Car
     public void resetCar()
     {
         partialReset();
+
         angle = CAR_ANGLE;
         position = DEFAULT_POSITION;
         direction = DEFAULT_DIRECTION;
         alive = true;
         selected = false;
         isParent = false;
+        isReset = false;
+
         car.setOpacity(1);
         car.setEffect( null );
+        car.setVisible( true );
     }
 
     public ImageView getCarImgView()
@@ -182,6 +189,9 @@ public class Car
         else
             car.setEffect( null );
 
+        // don't update the car rendering if it is dead
+        if ( isDead() ) return;
+
         car.setTranslateX( position.getX() );
         car.setTranslateY( position.getY() );
         car.setRotate( angle );
@@ -195,4 +205,5 @@ public class Car
     {
         return !alive;
     }
+    public boolean isReset() { return isReset; }
 }

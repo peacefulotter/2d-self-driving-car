@@ -3,14 +3,19 @@ package com.peacefulotter.ml;
 import com.peacefulotter.ml.game.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.util.converter.FormatStringConverter;
+
+import java.text.DecimalFormat;
 
 import static com.peacefulotter.ml.game.MultiThreadCircuit.THREADS;
 
@@ -34,8 +39,13 @@ public class Main extends Application
     private static final Spinner<Double> muteRateSpinner = new Spinner<>(0.001d, 0.100d, MUTATION_RATE, 0.001d);
 
     private static final Label FPS_LABEL = new Label( "0 fps" );
+    private static final Label populationProportionLabel = new Label( ORIGINAL_POPULATION + " / " + 0 );
+
+    private static final String GENETIC_STYLE = "-fx-padding: 0 5 0 15";
+    private static final String INFORMATIONS_STYLE = "-fx-label-padding: 0 15 0 15";
 
     private Circuit circuit;
+    private Map map;
 
     public static void main(String[] args) {
         launch( args );
@@ -45,7 +55,7 @@ public class Main extends Application
     public void start( Stage window ) throws Exception
     {
         Canvas canvas = new Canvas( CIRCUIT_WIDTH, CIRCUIT_HEIGHT );
-        Map map = new Map(canvas);
+        map = new Map(canvas);
         // if you want to run the circuit on a single thread, replace MultiThreadCircuit by Circuit (change also the population to a reasonable amount)
         System.out.println("Working on " + THREADS + " threads");
         this.circuit = new MultiThreadCircuit( map, ORIGINAL_POPULATION,
@@ -76,24 +86,26 @@ public class Main extends Application
         Spinner<Integer> populationSpinner = new Spinner<>(MIN_POPULATION, MAX_POPULATION, ORIGINAL_POPULATION, THREADS);
 
         Button nextGenButton = new Button( "Next Gen" );
+        Button toggleRenderDeadCarButton = new Button( "Toggle render dead car" );
+
         Label genLabel = new Label( "Generation 1" );
+        Label selectedParentsLabel = new Label( "0 Parents selected" );
         Label averageSpeed = new Label( "Average Speed: 0" );
 
-        populationLabel.setStyle( "-fx-padding: 0 5 0 15" );
-        crossoverLabel.setStyle( "-fx-padding: 0 5 0 15" );
-        mutStrengthLabel.setStyle( "-fx-padding: 0 5 0 15" );
-        mutRateLabel.setStyle( "-fx-padding: 0 5 0 15" );
-        genLabel.setStyle( "-fx-label-padding: 0 15 0 15" );
-        averageSpeed.setStyle( "-fx-label-padding: 0 15 0 15" );
-        FPS_LABEL.setStyle( "-fx-label-padding: 0 15 0 15" );
-
+        // Listeners and Bindings
         nextGenButton.setOnMouseClicked( event -> {
             circuit.nextGeneration(populationSpinner.getValue());
             genLabel.setText( "Generation " + (circuit.getGeneration() + 1) );
         } );
+        toggleRenderDeadCarButton.setOnMouseClicked( event -> {
+            map.toggleRenderDeadCars();
+        } );
+        circuit.getSelectedParents().addListener( (elt, o, n) ->
+                selectedParentsLabel.setText( n + " Parents selected" ) );
         circuit.getAverageSpeed().addListener( (elt, o, n) ->
                 averageSpeed.setText( "Average Speed: " + String.format("%1$,.2f", n.doubleValue() * 100) ) );
 
+        // Genetic Top Box
         HBox top = new HBox();
         top.setAlignment(Pos.CENTER_LEFT);
         top.setStyle( "-fx-padding: 0 0 15 0" );
@@ -102,16 +114,31 @@ public class Main extends Application
                 crossoverLabel, crossoverSpinner,
                 mutStrengthLabel, mutIntensitySpinner,
                 mutRateLabel, muteRateSpinner );
+        for ( int i = 0; i < top.getChildren().size(); i += 2 )
+            top.getChildren().get( i ).setStyle( GENETIC_STYLE );
+
+        // Buttons and Information Bottom Box
         HBox bottom = new HBox();
         bottom.setAlignment(Pos.CENTER_LEFT);
-        bottom.getChildren().addAll( nextGenButton, genLabel, FPS_LABEL, averageSpeed );
+        bottom.getChildren().addAll(
+                nextGenButton, toggleRenderDeadCarButton, genLabel,
+                selectedParentsLabel, populationProportionLabel,
+                FPS_LABEL, averageSpeed );
+        for ( Node node: bottom.getChildren() )
+            node.setStyle( INFORMATIONS_STYLE );
 
         pane.setTop( top );
         pane.setBottom( bottom );
+
         return pane;
     }
 
     public static void setFPS(double fps) {
         FPS_LABEL.setText( (int) fps + " fps" );
+    }
+
+    public static void setPopulationProportion( int alive, int dead )
+    {
+        populationProportionLabel.setText( alive + " / " + dead );
     }
 }

@@ -1,5 +1,6 @@
 package com.peacefulotter.ml.game;
 
+import com.peacefulotter.ml.Main;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
 import com.peacefulotter.ml.ia.Genetic;
@@ -7,7 +8,9 @@ import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import com.peacefulotter.ml.utils.Input;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.ImageView;
 
@@ -25,8 +28,9 @@ public class Circuit
 
     private static final List<Matrix2d> positions = new ArrayList<>();
     private static final List<Vector2d> controls = new ArrayList<>();
-    
-    private final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
+    private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
+    private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
+
     private final List<IACar> cars;
     private final Genetic genetic;
     private final Map map;
@@ -34,6 +38,7 @@ public class Circuit
     private int generation;
     private int population;
     private double speed;
+    private int deadCars;
 
     public Circuit( Map map, int population,
                     SpinnerValueFactory<Double> crossRate,
@@ -45,6 +50,11 @@ public class Circuit
         this.population = population;
         this.cars = new ArrayList<>();
         genCars();
+    }
+
+    public static void addSelectedParent( int amount )
+    {
+        selectedParents.setValue( selectedParents.getValue() + amount );
     }
 
     protected void addCarToMap( ImageView img )
@@ -104,6 +114,7 @@ public class Circuit
 
         generation += 1;
         population = cars.size();
+        deadCars = 0;
     }
 
     protected void update(float deltaTime, int from, int to)
@@ -127,7 +138,9 @@ public class Circuit
         for (int i = from; i < to; i++)
         {
             IACar car = cars.get( i );
-            if ( car.isDead() ) {
+            if ( car.isDead() && !car.isReset() )
+            {
+                deadCars += 1;
                 car.partialReset();
                 continue;
             }
@@ -136,7 +149,7 @@ public class Circuit
             double turn = output.getAt( 0, 1 );
             car.accelerate( throttle );
             car.turn( turn );
-            car.update(deltaTime);
+            car.update( deltaTime );
             speed += car.getSpeed();
         }
     }
@@ -144,11 +157,14 @@ public class Circuit
     public void render()
     {
         averageSpeed.setValue( speed / population );
-        map.render( cars );
         speed = 0;
+
+        Main.setPopulationProportion( population - deadCars, deadCars );
+        map.render( cars );
     }
 
     public int getGeneration() { return generation; }
     public int getPopulation() { return population; }
     public DoubleProperty getAverageSpeed() { return averageSpeed; }
+    public IntegerProperty getSelectedParents() { return selectedParents; }
 }

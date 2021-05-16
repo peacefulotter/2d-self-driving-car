@@ -1,5 +1,6 @@
 package com.peacefulotter.ml.game;
 
+import com.peacefulotter.ml.Main;
 import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
@@ -17,6 +18,8 @@ public class Map extends StackPane
 {
     private final Canvas canvas;
     private final GraphicsContext ctx;
+
+    private boolean showDeadCars = true;
 
     public Map( Canvas canvas )
     {
@@ -48,6 +51,12 @@ public class Map extends StackPane
         canvas.requestFocus();
     }
 
+    public void toggleRenderDeadCars()
+    {
+        showDeadCars = !showDeadCars;
+    }
+
+
     public void addCarToMap(ImageView img)
     {
         setAlignment( img, Pos.TOP_LEFT );
@@ -64,6 +73,10 @@ public class Map extends StackPane
         ctx.clearRect( 0, 0, canvas.getWidth(), canvas.getHeight() );
 
         for (IACar car: cars)
+        {
+            car.getCarImgView().setVisible( !car.isDead() || showDeadCars );
             car.render(ctx);
+        }
+
     }
 }
