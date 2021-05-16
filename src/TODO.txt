@@ -1,5 +1,7 @@
-- add states for the car
+- [X] add states for the car
 - (better collision detection)
-- average speed is wrong in multi threading
+- [X?] average speed is wrong in multi threading
 - create a Settings class
 - /!\ POPULATION needs to be a multiple of THREADS
+- Implement the test map to see if the neural networks actually learn
+- save the selected parents NN into files

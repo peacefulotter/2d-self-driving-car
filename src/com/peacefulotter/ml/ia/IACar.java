@@ -82,4 +82,6 @@ public class IACar extends Car
         nn.train( X, Y, Loss.MSE, 1e-4, 250, 1, 10 );
         // nextGeneration( new ArrayList<>(1) { { add(0); } }, population );
     }
+
+    public NeuralNetwork getCopyNN() { return new NeuralNetwork( nn ); }
 }

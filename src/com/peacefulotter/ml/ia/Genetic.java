@@ -1,11 +1,9 @@
 package com.peacefulotter.ml.ia;
 
 import com.peacefulotter.ml.maths.Matrix2d;
-import com.sun.scenario.effect.impl.sw.java.JSWBlend_SRC_OUTPeer;
 import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -28,7 +26,6 @@ public class Genetic
         // if the car is already created, simply reset it and set its NN to the new mutated one
         if ( index < population )
         {
-            System.out.println(index);
             IACar car = cars.get( index );
             car.resetCar();
             car.setNN( mutate( parent ) );
@@ -38,16 +35,13 @@ public class Genetic
             cars.add( new IACar( mutate( parent ) ) );
     }
 
-    private void setOrAddCar( List<IACar> cars, int index, int population, IACar car )
+    private void setOrAddParentCar( List<IACar> cars, int index, int population, IACar car )
     {
         car.resetCar();
+        car.setParent( true );
         // if the car is already created, simply reset it and set its NN to the new mutated one
         if ( index < population )
-        {
-            System.out.println(index);
-
             cars.set( index, car );
-        }
         // if the car doesn't yet exist, create a new one
         else
             cars.add( car );
@@ -67,10 +61,9 @@ public class Genetic
         for (int i = 0; i < parentsIndex.size(); i++)
         {
             // add default parents
-            IACar defaultParent = cars.get( parentsIndex.get( i ) );
-            defaultParent.resetCar();
-            defaultParent.setParent( true );
-            parents.add( defaultParent );
+            IACar parent = cars.get( parentsIndex.get( i ) );
+            parents.add( new IACar( parent.getCopyNN() ) );
+
             // and crossover all parents
             for ( int j = 0; j < i; j++ )
             {
@@ -88,18 +81,12 @@ public class Genetic
         int oldPopulation = cars.size();
         int childrenMaxPopulation = newPopulation - parentSize;
         int childrenPerParent = childrenMaxPopulation / parentSize;
-        System.out.println("new population: " + newPopulation + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent + " cars size: " + cars.size());
-        int carsIndex = 0;
-        for ( int i = 0; i < parentSize; i++ )
-        {
-            for ( int j = 0; j < childrenPerParent; j++ )
-            {
-                setOrAddMutatedParent( cars, carsIndex, oldPopulation, parents.get(i) );
-                carsIndex += 1;
-            }
-        }
+        System.out.println("new population: " + newPopulation + ", old population: " + cars.size() + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
 
-        System.out.println("carsIndex: " + carsIndex);
+        int carsIndex = 0;
+        for ( IACar parent : parents )
+            for ( int j = 0; j < childrenPerParent; j++ )
+                setOrAddMutatedParent( cars, carsIndex++, oldPopulation, parent );
 
         // if there is still room for new cars, complete the population
         if ( carsIndex < childrenMaxPopulation )
@@ -111,19 +98,28 @@ public class Genetic
 
         // add the parents (NOT MUTATED)
         for ( int i = 0; i < parentSize; i++ )
-            setOrAddCar( cars, i + childrenMaxPopulation, oldPopulation, parents.get( i ) );
+            setOrAddParentCar( cars, i + childrenMaxPopulation, oldPopulation, parents.get( i ) );
 
         System.out.println("final size:  " + cars.size() );
     }
 
 
-    private Matrix2d crossing( Matrix2d a, Matrix2d b )
+    /*private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {
             if ( Math.random() < crossRate.getValue() )
                 return ( a.getAt( i, j ) + b.getAt( i, j ) ) / 2d;
             else
                 return a.getAt( i, j );
+        } );
+    }*/
+    private Matrix2d crossing( Matrix2d a, Matrix2d b )
+    {
+        return a.applyFunc( (mat, i, j) -> {
+            if ( Math.random() < crossRate.getValue() )
+                return a.getAt( i, j );
+            else
+                return b.getAt( i, j );
         } );
     }
 

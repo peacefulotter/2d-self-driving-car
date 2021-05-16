@@ -115,6 +115,7 @@ public class Circuit
         generation += 1;
         population = cars.size();
         deadCars = 0;
+        selectedParents.setValue( 0 );
     }
 
     protected void update(float deltaTime, int from, int to)

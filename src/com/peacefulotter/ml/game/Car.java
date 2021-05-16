@@ -3,6 +3,7 @@ package com.peacefulotter.ml.game;
 import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
+import javafx.scene.CacheHint;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
@@ -30,10 +31,6 @@ public class Car
     private static final Vector2d DEFAULT_DIRECTION = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( CAR_WIDTH / 2f, CAR_HEIGHT / 2f );
 
-    private static final ColorAdjust SELECTED_COLOR = new ColorAdjust( 0.6, 1, 0.5, 1 );
-    private static final ColorAdjust DEAD_COLOR = new ColorAdjust( 0.95, 0.2, 0.1, 0.4 );
-    private static final ColorAdjust PARENT_COLOR = new ColorAdjust( -0.6, 0.7, 0.4, 1 );
-
     private static final Image CAR_IMG = new Image( "/img/car.png", CAR_WIDTH, CAR_HEIGHT, true, false );
 
     public static Matrix2d hitbox;
@@ -42,9 +39,29 @@ public class Car
     private final boolean drawArrows;
     protected final List<Arrow> arrows;
 
+    private CarColor colorEffect = CarColor.NO_COLOR;
     private Vector2d position, direction;
     protected double speed, acceleration, angle, angleSpeed;
-    private boolean alive, selected, isParent, isReset;
+    private boolean alive, selected, isParent, isReset, colorChanged;
+
+    private enum CarColor
+    {
+        NO_COLOR(0, 0, 0, 0),
+        SELECTED_COLOR( 0.6, 1, 0.5, 1 ),
+        PARENT_COLOR( -0.6, 0.7, 0.4, 1 ),
+        DEAD_COLOR( 0.95, 0.2, 0.1, 0.4 );
+
+        private final ColorAdjust color;
+
+        // CarColor() { color = null; }
+
+        CarColor( double hue, double saturation, double brightness, double contrast)
+        {
+            color = new ColorAdjust(hue, saturation, brightness, contrast);
+        }
+
+        protected ColorAdjust getColor() { return color; }
+    }
 
     public Car( int nbArrows, boolean drawArrows )
     {
@@ -62,12 +79,15 @@ public class Car
 
         // initialize the car image
         this.car = new ImageView( CAR_IMG );
+        this.car.setCache( true );
+        this.car.setCacheHint( CacheHint.SPEED );
         this.car.setOnMouseClicked( ( event ) -> {
             selected = !selected;
             Circuit.addSelectedParent(selected ? 1 : -1);
-
-            // if ( selected ) car.setEffect( SELECTED_COLOR );
-            // else  car.setEffect( null );
+            colorEffect = selected ?
+                    CarColor.SELECTED_COLOR :
+                    alive ? CarColor.NO_COLOR : CarColor.DEAD_COLOR;
+            colorChanged = true;
         } );
 
         resetCar();
@@ -98,9 +118,10 @@ public class Car
         selected = false;
         isParent = false;
         isReset = false;
+        colorChanged = true;
+        colorEffect = CarColor.NO_COLOR;
 
         car.setOpacity(1);
-        car.setEffect( null );
         car.setVisible( true );
     }
 
@@ -126,7 +147,8 @@ public class Car
     public void setParent( boolean isParent )
     {
         this.isParent = isParent;
-        // if ( isParent ) car.setEffect( PARENT_COLOR );
+        colorEffect = isParent ?  CarColor.PARENT_COLOR : CarColor.NO_COLOR;
+        colorChanged = true;
     }
 
 
@@ -172,22 +194,25 @@ public class Car
             arrow.updateParams( position.add( SHIFT_ORIGIN ), angle );
 
         alive = checkHitbox();
+
         if ( !alive ) {
-            // if (!selected) car.setEffect( DEAD_COLOR );
+            if (!isParent && !selected)
+            {
+                colorEffect = CarColor.DEAD_COLOR;
+                colorChanged = true;
+            }
             car.setOpacity(0.4);
         }
     }
 
     public void render( GraphicsContext ctx )
     {
-        if ( selected )
-            car.setEffect( SELECTED_COLOR );
-        else if ( isParent )
-            car.setEffect( PARENT_COLOR );
-        else if ( !alive )
-            car.setEffect( DEAD_COLOR );
-        else
-            car.setEffect( null );
+        // setting the effect of an image view each frame is expensive
+        if ( colorChanged )
+        {
+            car.setEffect( colorEffect.getColor() );
+            colorChanged = false;
+        }
 
         // don't update the car rendering if it is dead
         if ( isDead() ) return;
