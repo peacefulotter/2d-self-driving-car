@@ -21,59 +21,41 @@ public class Genetic
         this.mutRate = mutRate;
     }
 
-    private void setOrAddMutatedParent( List<IACar> cars, int index, int population, IACar parent )
+    private void addMutatedParent( List<IACar> cars, IACar parent )
     {
-        // if the car is already created, simply reset it and set its NN to the new mutated one
-        if ( index < population )
-        {
-            IACar car = cars.get( index );
-            car.resetCar();
-            car.setNN( mutate( parent ) );
-        }
-        // if the car doesn't yet exist, create a new one
-        else
-            cars.add( new IACar( mutate( parent ) ) );
+        cars.add( new IACar( mutate( parent ) ) );
     }
 
-    private void setOrAddParentCar( List<IACar> cars, int index, int population, IACar car )
-    {
-        car.resetCar();
-        car.setParent( true );
-        // if the car is already created, simply reset it and set its NN to the new mutated one
-        if ( index < population )
-            cars.set( index, car );
-        // if the car doesn't yet exist, create a new one
-        else
-            cars.add( car );
-    }
 
     /**
      * Crossover the parents and mutate them to obtain their children
      * FIXME: does not guarantee at all to obtain a population of size newPopulation
-     * @param parentsIndex: indices in the cars list of the selected parents
-     * @param cars: cars that drove the circuit
+     * @param parents: selected parents from all the cars
      * @param newPopulation: size of the new population
      */
-    public void nextGeneration( List<Integer> parentsIndex, List<IACar> cars, int newPopulation )
+    public List<IACar> nextGeneration( List<IACar> parents, int newPopulation )
     {
+        List<IACar> cars = new ArrayList<>();
         // parents = default parents + their crossover
-        List<IACar> parents = new ArrayList<>();
-        for (int i = 0; i < parentsIndex.size(); i++)
+        List<IACar> fullParents = new ArrayList<>();
+        for ( int i = 0; i < parents.size(); i++ )
         {
             // add default parents
-            IACar parent = cars.get( parentsIndex.get( i ) );
-            parents.add( new IACar( parent.getCopyNN() ) );
+            IACar parent = parents.get( i );
+            // FIXME: UNSURE: parents.add( new IACar( parent.getCopyNN() ) );
+            fullParents.add( parent );
 
             // and crossover all parents
             for ( int j = 0; j < i; j++ )
             {
-                NeuralNetwork crossNN = crossover(
-                        cars.get( parentsIndex.get( i ) ),
-                        cars.get( parentsIndex.get( j ) ) );
-                parents.add( new IACar( crossNN ) );
+                IACar otherParent = parents.get( j );
+                NeuralNetwork crossNN = crossover( parent, otherParent );
+                IACar crossedParent = new IACar( crossNN );
+                crossedParent.setCrossedParent();
+                fullParents.add( crossedParent );
             }
         }
-        int parentSize = parents.size();
+        int parentSize = fullParents.size();
         System.out.println(parentSize + " parent(s) after crossover");
 
         // Mutation = mutate all the parents and add them to the population
@@ -84,23 +66,22 @@ public class Genetic
         System.out.println("new population: " + newPopulation + ", old population: " + cars.size() + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
 
         int carsIndex = 0;
-        for ( IACar parent : parents )
+        for ( IACar parent : fullParents )
             for ( int j = 0; j < childrenPerParent; j++ )
-                setOrAddMutatedParent( cars, carsIndex++, oldPopulation, parent );
+                addMutatedParent( cars, parent );
 
         // if there is still room for new cars, complete the population
         if ( carsIndex < childrenMaxPopulation )
         {
-            IACar mainParent = parents.get( 0 );
+            IACar mainParent = fullParents.get( 0 );
             for ( int i = carsIndex; i < childrenMaxPopulation; i++ )
-                setOrAddMutatedParent( cars, i, oldPopulation, mainParent );
+                addMutatedParent( cars, mainParent );
         }
 
-        // add the parents (NOT MUTATED)
-        for ( int i = 0; i < parentSize; i++ )
-            setOrAddParentCar( cars, i + childrenMaxPopulation, oldPopulation, parents.get( i ) );
+        // add the parents (NOT MUTATED) at the end so that they appear in front of the other cars
+        cars.addAll( fullParents );
 
-        System.out.println("final size:  " + cars.size() );
+        return cars;
     }
 
 
@@ -113,6 +94,8 @@ public class Genetic
                 return a.getAt( i, j );
         } );
     }*/
+
+    // FIXME: FIND GOOD CROSSOVER FUNCTION
     private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {

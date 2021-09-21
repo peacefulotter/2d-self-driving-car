@@ -1,6 +1,5 @@
 package com.peacefulotter.ml.game;
 
-import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.CacheHint;
@@ -20,12 +19,13 @@ public class Car
     private static final int CAR_POSITION_Y = 480;
     private static final int CAR_ANGLE = -55;
 
-    private static final double CONTROLS_EASE = 6;
-    private static final double MAX_SPEED = 2.5;
-    private static final double SLOWNESS = 0.1;
-    private static final double ACCELERATION_FACTOR = 0.2;
-    private static final double BRAKING_FACTOR = 0.3;
-    private static final double TURN_DEGREE = 0.15;
+    private static final double SPEED_EASE = 4;
+    private static final double ANGLE_EASE = 500; // 300 USER_CONTROL;
+    private static final double MAX_SPEED = 1.5;
+    private static final double SLOWNESS = 0.05;
+    private static final double ACCELERATION_FACTOR = 0.15;
+    private static final double BRAKING_FACTOR = 0.2;
+    private static final double TURN_DEGREE = 0.2;
 
     private static final Vector2d DEFAULT_POSITION = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
     private static final Vector2d DEFAULT_DIRECTION = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
@@ -49,11 +49,10 @@ public class Car
         NO_COLOR(0, 0, 0, 0),
         SELECTED_COLOR( 0.6, 1, 0.5, 1 ),
         PARENT_COLOR( -0.6, 0.7, 0.4, 1 ),
+        CROSSED_PARENT( 0.3, 1, 0.8, 1 ),
         DEAD_COLOR( 0.95, 0.2, 0.1, 0.4 );
 
         private final ColorAdjust color;
-
-        // CarColor() { color = null; }
 
         CarColor( double hue, double saturation, double brightness, double contrast)
         {
@@ -78,18 +77,7 @@ public class Car
         }
 
         // initialize the car image
-        this.car = new ImageView( CAR_IMG );
-        this.car.setCache( true );
-        this.car.setCacheHint( CacheHint.SPEED );
-        this.car.setOnMouseClicked( ( event ) -> {
-            selected = !selected;
-            Circuit.addSelectedParent(selected ? 1 : -1);
-            colorEffect = selected ?
-                    CarColor.SELECTED_COLOR :
-                    alive ? CarColor.NO_COLOR : CarColor.DEAD_COLOR;
-            colorChanged = true;
-        } );
-
+        this.car = createImageView();
         resetCar();
     }
 
@@ -144,13 +132,18 @@ public class Car
         return speed;
     }
 
-    public void setParent( boolean isParent )
+    public void setParent()
     {
-        this.isParent = isParent;
-        colorEffect = isParent ?  CarColor.PARENT_COLOR : CarColor.NO_COLOR;
+        this.isParent = true;
+        colorEffect = CarColor.PARENT_COLOR;
         colorChanged = true;
     }
 
+    public void setCrossedParent()
+    {
+        colorEffect = CarColor.CROSSED_PARENT;
+        colorChanged = true;
+    }
 
     private boolean checkHitbox()
     {
@@ -178,14 +171,15 @@ public class Car
     public void update( float deltaTime )
     {
         if ( !alive ) return;
-        double newSpeed = speed + ( acceleration - SLOWNESS ) * deltaTime * CONTROLS_EASE;
+        double newSpeed = speed + ( acceleration - SLOWNESS ) * deltaTime * SPEED_EASE;
         if ( newSpeed <= MAX_SPEED && newSpeed >= 0 )
             speed = newSpeed;
 
         if ( angleSpeed != 0 )
         {
-            direction = direction.rotate( angleSpeed * CONTROLS_EASE );
-            angle += angleSpeed * CONTROLS_EASE;
+            double deltaAngle = angleSpeed * ANGLE_EASE * deltaTime;
+            direction = direction.rotate( deltaAngle );
+            angle += deltaAngle;
         }
 
         position = position.add( direction.mul( speed ) );
@@ -224,6 +218,22 @@ public class Car
         if ( drawArrows )
             for ( Arrow arrow : arrows )
                 arrow.draw( ctx );
+    }
+
+    private ImageView createImageView()
+    {
+        ImageView img = new ImageView( CAR_IMG );
+        img.setCache( true );
+        img.setCacheHint( CacheHint.SPEED );
+        img.setOnMouseClicked( ( event ) -> {
+            selected = !selected;
+            Circuit.addSelectedParent(selected ? 1 : -1);
+            colorEffect = selected ?
+                    CarColor.SELECTED_COLOR :
+                    alive ? CarColor.NO_COLOR : CarColor.DEAD_COLOR;
+            colorChanged = true;
+        } );
+        return img;
     }
 
     public boolean isDead()

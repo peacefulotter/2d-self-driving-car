@@ -5,40 +5,34 @@ import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
 import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.maths.Matrix2d;
-import com.peacefulotter.ml.maths.Vector2d;
-import com.peacefulotter.ml.utils.Input;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class Circuit
 {
     // train one neural network before using GA
     // this uses supervised learning and gradient descent with a dataset I made playing the game
-    private static final boolean TRAIN_BEFORE = true;
-    private static final boolean USER_CONTROL = false;
-    private static final int DIVERSITY_THRESHOLD = 4;
+    private static final boolean TRAIN_BEFORE = false;
+    private static final int DIVERSITY_THRESHOLD = 3;
 
-    private static final List<Matrix2d> positions = new ArrayList<>();
-    private static final List<Vector2d> controls = new ArrayList<>();
     private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
     private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
 
-    private final List<IACar> cars;
     private final Genetic genetic;
-    private final Map map;
+    protected final Map map;
 
-    private int generation;
-    private int population;
+    private List<IACar> cars;
     private double speed;
+    private int generation;
     private int deadCars;
+
+    protected int population;
 
     public Circuit( Map map, int population,
                     SpinnerValueFactory<Double> crossRate,
@@ -57,86 +51,76 @@ public class Circuit
         selectedParents.setValue( selectedParents.getValue() + amount );
     }
 
-    protected void addCarToMap( ImageView img )
-    {
-        map.addCarToMap( img );
-    }
-
     public void genCars()
     {
         for (int i = 0; i < population; i++)
         {
-            IACar car = new IACar();
-            cars.add( car );
-            addCarToMap( car.getCarImgView() );
+            addCarToCircuit();
         }
+    }
+
+    private void addCarToCircuit()
+    {
+        IACar car = new IACar();
+        cars.add( car );
+        map.addCarToMap( car.getCarImgView() );
     }
 
     public void update( float deltaTime ) { update( deltaTime, 0, population ); }
 
     public void nextGeneration( int newPopulation )
     {
-        List<Integer> parentsIndex = new ArrayList<>();
-        // the selected cars become the parents of the next generation
-        for (int i = 0; i < population; i++) {
-            Car car = cars.get( i );
-            if ( car.isSelected() )
-            {
-                parentsIndex.add( i );
-                car.resetCar();
-                car.setParent( true );
-            }
-        }
+        List<IACar> parents = getGenerationParents();
 
-        int parentsSize = parentsIndex.size();
+        int parentsSize = parents.size();
         if ( parentsSize == 0 )
         {
-            System.out.println( "No parent selected, aborting next generation");
+            System.out.println( "No parent selected, aborting next generation and rerunning this gen.");
             return;
         } else if ( parentsSize < DIVERSITY_THRESHOLD )
         {
             System.out.println( "You only have selected " + parentsSize + " parent(s), this might lead to poor diversity and thus long or no training in the long run");
         }
 
-        // apply crossovers and mutations
-        genetic.nextGeneration( parentsIndex, cars, newPopulation );
-
-        // if new population < old population, remove unnecessary cars
-        if ( newPopulation < population )
+        // apply crossovers to the parents
+        // and generate the new population by mutating them
+        cars = genetic.nextGeneration( parents, newPopulation );
+        // clear the map and add the new cars
+        map.remove( 0, population );
+        for ( IACar car: cars )
         {
-            cars.subList( newPopulation, population ).clear();
-            map.remove( newPopulation + 2, population + 2 );
+            map.addCarToMap( car.getCarImgView() );
         }
-        // if the new population is bigger, add the new cars to the circuit
-        else if ( newPopulation > population )
-            for ( int i = population; i < newPopulation; i++ )
-                addCarToMap(cars.get( i ).getCarImgView());
 
         generation += 1;
-        population = cars.size();
+        population = newPopulation;
         deadCars = 0;
         selectedParents.setValue( 0 );
+        averageSpeed.setValue( 0 );
     }
 
-    protected void update(float deltaTime, int from, int to)
+    // the selected cars become the parents for the next generation
+    private List<IACar> getGenerationParents()
     {
-        if (USER_CONTROL)
+        List<IACar> parents = new ArrayList<>();
+        for ( IACar car: cars )
         {
-            Matrix2d x = cars.get( 0 ).simulate();
-            Vector2d y = Input.getVector();
-            positions.add( x );
-            controls.add( y.copy() );
-            if (positions.size() > 3500)
+            if ( car.isSelected() )
             {
-                Loader.saveDrivingData( positions, controls );
-                System.out.println("SAVED");
-                positions.clear();
-                controls.clear();
+                car.resetCar();
+                parents.add( car );
+                car.setParent();
             }
-            return;
+            else
+                car.resetCar();
         }
 
-        for (int i = from; i < to; i++)
+        return parents;
+    }
+
+    protected void update( float deltaTime, int from, int to )
+    {
+        for ( int i = from; i < to; i++ )
         {
             IACar car = cars.get( i );
             if ( car.isDead() && !car.isReset() )
@@ -145,27 +129,59 @@ public class Circuit
                 car.partialReset();
                 continue;
             }
+
+            // get the output from the NN
             Matrix2d output = car.simulate();
             double throttle = output.getAt( 0, 0 );
             double turn = output.getAt( 0, 1 );
+
+            // and apply it to the car
             car.accelerate( throttle );
             car.turn( turn );
             car.update( deltaTime );
+
             speed += car.getSpeed();
         }
     }
 
     public void render()
     {
-        averageSpeed.setValue( speed / population );
+        averageSpeed.setValue( speed / (float) population );
         speed = 0;
 
         Main.setPopulationProportion( population - deadCars, deadCars );
         map.render( cars );
     }
 
+    public void testGeneration()
+    {
+        for (int i = population - 1; i >= 0; i--) {
+            Car car = cars.get( i );
+            if ( car.isSelected() )
+            {
+                car.resetCar();
+                car.setParent();
+            }
+            else
+            {
+                map.remove( i );
+            }
+        }
+    }
+
+    public void saveSelectedCar()
+    {
+        for ( IACar car: cars )
+        {
+            if ( car.isSelected() )
+            {
+                new Loader().saveModel( car.getCopyNN() );
+                return;
+            }
+        }
+    }
+
     public int getGeneration() { return generation; }
-    public int getPopulation() { return population; }
     public DoubleProperty getAverageSpeed() { return averageSpeed; }
     public IntegerProperty getSelectedParents() { return selectedParents; }
 }
