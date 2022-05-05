@@ -1,5 +1,22 @@
-(go to the master branch to see the code)
-(the readme is outdated since more work has been put into this project and results have improved / changed. It is still kind of relevant though)
+## Description
+Neural networks that evolve using genetic algorithm. Cars that drove the best are selected and used for the next generation (parents). After repeating this process 5-10 times, some cars are able to drive around the track at least once.'
+
+## Showcase
+
+![showcase img](./showcase.png)
+
+## Requirements
+- JavaFX
+
+## Bugs
+- IllegalArgument sometimes when creating a new gen
+- Parents are not properly included in the next gen
+
+## Future work
+- Make the selection automatic
+- Add bonuses to encourage the network to use certain driving lines that are optimized for speed
+
+
 
 # How does it work ?
 Each car is assigned a neural network and has 5 "arrows" (lines from the center of the car to the nearest wall at a certain angle).
