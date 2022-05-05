@@ -1,6 +1,17 @@
-# SelfDrivingCar
-Self driving car using a neural network and genetic algorithm, built from scratch
+## Description
+Neural networks that evolve using genetic algorithm. Cars that drove the best are selected and used for the next generation (parents). After repeating this process 5-10 times, some cars are able to drive around the track at least once.'
 
-### Requirements
+## Showcase
+
+![showcase img](./showcase.png)
+
+## Requirements
 - JavaFX
-- GSON: https://search.maven.org/artifact/com.google.code.gson/gson/2.8.8/jar
+
+## Bugs
+- IllegalArgument sometimes when creating a new gen
+- Parents are not properly included in the next gen
+
+## Future work
+- Make the selection automatic
+- Add bonuses to encourage the network to use certain driving lines that are optimized for speed
