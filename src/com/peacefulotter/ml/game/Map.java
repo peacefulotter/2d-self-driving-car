@@ -1,6 +1,7 @@
 package com.peacefulotter.ml.game;
 
 
+import com.peacefulotter.ml.game.car.Car;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
 import javafx.geometry.Pos;
@@ -14,12 +15,6 @@ import java.util.List;
 
 public class Map extends StackPane
 {
-    private static final String trainMapImageFile = "/img/map.png";
-    private static final String testMapImageFile = "/img/map_test.png";
-
-    private static final String trainHitboxImageFile = "/img/hitbox_map.png";
-    private static final String testHitboxImageFile = "/img/hitbox_map_test.png";
-
     // number of children before the car images
     private static final int BASE_CHILDREN = 2;
 
@@ -30,13 +25,10 @@ public class Map extends StackPane
 
     private boolean showDeadCars = true;
 
-    public Map( Canvas canvas )
+    public Map( Canvas canvas, MapParams params )
     {
         this.canvas = canvas;
         this.ctx = canvas.getGraphicsContext2D();
-
-        Car.hitbox = new Loader().
-                loadHitboxMap( trainHitboxImageFile, canvas.getWidth(), canvas.getHeight() );
 
         circuitImage = new ImageView();
         circuitImage.setX( 0 );
@@ -45,8 +37,8 @@ public class Map extends StackPane
         circuitImage.setFitHeight( canvas.getHeight() );
         circuitImage.setStyle(  "-fx-spacing: 4; -fx-padding: 3px;" );
         circuitImage.setPreserveRatio( true );
-        Image img = new Image( trainMapImageFile);
-        circuitImage.setImage( img );
+
+        setParams(params);
 
         getChildren().addAll( circuitImage, canvas );
 
@@ -54,21 +46,30 @@ public class Map extends StackPane
         canvas.requestFocus();
     }
 
+    public void setParams( MapParams params )
+    {
+        Car.ORIGIN_POSITION = params.getDirection();
+        Car.ORIGIN_ANGLE = params.getAngle();
+        Car.hitbox = new Loader().loadHitbox( params.getHitbox(), canvas.getWidth(), canvas.getHeight() );
+        Image img = new Image( params.getImg() );
+        circuitImage.setImage( img );
+    }
+
     public void toggleRenderDeadCars()
     {
         showDeadCars = !showDeadCars;
     }
 
-
-    public void addCarToMap( ImageView img )
+    public void addCarToMap( Car car )
     {
+        ImageView img = car.getCarImgView();
         setAlignment( img, Pos.TOP_LEFT );
         getChildren().add( img );
     }
 
     public void remove( int i )
     {
-        getChildren().remove( i + BASE_CHILDREN );
+        remove( i, i + 1 );
     }
 
     public void remove( int from, int to )
@@ -76,7 +77,7 @@ public class Map extends StackPane
         getChildren().remove( from + BASE_CHILDREN, to + BASE_CHILDREN );
     }
 
-    protected void render( List<IACar> cars )
+    public void render(List<IACar> cars)
     {
         ctx.clearRect( 0, 0, canvas.getWidth(), canvas.getHeight() );
 
@@ -87,12 +88,4 @@ public class Map extends StackPane
         }
     }
 
-    public void setTestMap()
-    {
-        Car.hitbox = new Loader().
-                loadHitboxMap( testHitboxImageFile, canvas.getWidth(), canvas.getHeight() );
-
-        Image img = new Image( testMapImageFile );
-        circuitImage.setImage( img );
-    }
 }

@@ -1,6 +1,7 @@
 package com.peacefulotter.ml.game;
 
 import com.peacefulotter.ml.Main;
+import com.peacefulotter.ml.game.circuit.Circuit;
 import com.peacefulotter.ml.utils.Time;
 import javafx.animation.AnimationTimer;
 

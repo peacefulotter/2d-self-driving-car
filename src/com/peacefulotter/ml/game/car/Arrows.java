@@ -1,4 +1,4 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.car;
 
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;

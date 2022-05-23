@@ -1,12 +1,11 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.circuit;
 
+import com.peacefulotter.ml.game.Map;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import com.peacefulotter.ml.utils.Input;
 import com.peacefulotter.ml.utils.Loader;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +23,9 @@ public class ControlCircuit extends Circuit
 
     public ControlCircuit( Map map )
     {
-        super( map, 0, null, null, null );
+        super( map, 0, null );
 
-        map.addCarToMap( car.getCarImgView() );
-
-        // Used to control a car - only to test or add new features in the future
+        map.addCarToMap( car );
         map.setOnKeyPressed( keyEvent -> Input.handleKeyPressed( car, keyEvent ) );
         map.setOnKeyReleased( keyEvent -> Input.handleKeyReleased( car, keyEvent ) );
     }

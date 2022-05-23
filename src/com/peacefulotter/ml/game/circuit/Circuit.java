@@ -1,6 +1,8 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.circuit;
 
 import com.peacefulotter.ml.Main;
+import com.peacefulotter.ml.game.car.Car;
+import com.peacefulotter.ml.game.Map;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
 import com.peacefulotter.ml.ia.Genetic;
@@ -13,6 +15,7 @@ import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Circuit
 {
@@ -34,19 +37,16 @@ public class Circuit
 
     protected int population;
 
-    public Circuit( Map map, int population,
-                    SpinnerValueFactory<Double> crossRate,
-                    SpinnerValueFactory<Double> mutStrength,
-                    SpinnerValueFactory<Double> mutRate )
+    public Circuit( Map map, int population, Genetic genetic)
     {
         this.map = map;
-        this.genetic = new Genetic(crossRate, mutStrength, mutRate);
+        this.genetic = genetic;
         this.population = population;
         this.cars = new ArrayList<>();
         genCars();
     }
 
-    public static void addSelectedParent( int amount )
+    public static void addSelected( int amount )
     {
         selectedParents.setValue( selectedParents.getValue() + amount );
     }
@@ -63,14 +63,14 @@ public class Circuit
     {
         IACar car = new IACar();
         cars.add( car );
-        map.addCarToMap( car.getCarImgView() );
+        map.addCarToMap( car );
     }
 
     public void update( float deltaTime ) { update( deltaTime, 0, population ); }
 
     public void nextGeneration( int newPopulation )
     {
-        List<IACar> parents = getGenerationParents();
+        List<IACar> parents = getGenParents();
 
         int parentsSize = parents.size();
         if ( parentsSize == 0 )
@@ -83,14 +83,13 @@ public class Circuit
         }
 
         // apply crossovers to the parents
-        // and generate the new population by mutating them
+        // and generate the new population by mutating the crossed parents
         cars = genetic.nextGeneration( parents, newPopulation );
+
         // clear the map and add the new cars
         map.remove( 0, population );
         for ( IACar car: cars )
-        {
-            map.addCarToMap( car.getCarImgView() );
-        }
+            map.addCarToMap( car );
 
         generation += 1;
         population = newPopulation;
@@ -100,22 +99,11 @@ public class Circuit
     }
 
     // the selected cars become the parents for the next generation
-    private List<IACar> getGenerationParents()
+    private List<IACar> getGenParents()
     {
-        List<IACar> parents = new ArrayList<>();
-        for ( IACar car: cars )
-        {
-            if ( car.isSelected() )
-            {
-                car.resetCar();
-                parents.add( car );
-                car.setParent();
-            }
-            else
-                car.resetCar();
-        }
-
-        return parents;
+        return cars.stream()
+                .filter(Car::isSelected)
+                .collect(Collectors.toList());
     }
 
     protected void update( float deltaTime, int from, int to )
@@ -156,7 +144,7 @@ public class Circuit
     public void testGeneration()
     {
         for (int i = population - 1; i >= 0; i--) {
-            Car car = cars.get( i );
+            IACar car = cars.get( i );
             if ( car.isSelected() )
             {
                 car.resetCar();

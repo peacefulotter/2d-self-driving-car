@@ -1,4 +1,4 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.circuit;
 
 /**
  * Handles a part of the circuit cars (only the update)

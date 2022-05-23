@@ -1,7 +1,9 @@
 package com.peacefulotter.ml;
 
 import com.peacefulotter.ml.game.*;
-import com.peacefulotter.ml.utils.Logger;
+import com.peacefulotter.ml.game.circuit.Circuit;
+import com.peacefulotter.ml.game.circuit.MultiThreadCircuit;
+import com.peacefulotter.ml.ia.Genetic;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -14,14 +16,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-
-import static com.peacefulotter.ml.game.MultiThreadCircuit.THREADS;
-
 public class Main extends Application
 {
     private static final int CIRCUIT_WIDTH = 794;
     private static final int CIRCUIT_HEIGHT = 599;
-    private static final int MIN_CANVAS_WIDTH = CIRCUIT_WIDTH;
+    private static final int MIN_CANVAS_WIDTH = CIRCUIT_WIDTH + 300;
     private static final int MIN_CANVAS_HEIGHT = CIRCUIT_HEIGHT + 120;
 
     private static final int ORIGINAL_POPULATION = 1000;
@@ -53,27 +52,22 @@ public class Main extends Application
     @Override
     public void start( Stage window ) throws Exception
     {
-        System.out.println("Working on " + THREADS + " threads");
-
         Canvas canvas = new Canvas( CIRCUIT_WIDTH, CIRCUIT_HEIGHT );
-        map = new Map(canvas);
+        map = new Map(canvas, MapParams.DEFAULT);
+
+        Genetic genetic = new Genetic(
+                crossoverSpinner.getValueFactory(),
+                mutIntensitySpinner.getValueFactory(),
+                muteRateSpinner.getValueFactory()
+        );
+
         /* Replace by either:
             new Circuit(...) --> runs on a single thread (be careful with the ORIGINAL_POPULATION value)
             new MultiThreadCircuit(...) --> runs on multiple threads
             new ControlCircuit(...) --> be able to control a car on the circuit
          */
-        /*
-        ORIGINAL_POPULATION,
-                crossoverSpinner.getValueFactory(),
-                mutIntensitySpinner.getValueFactory(),
-                muteRateSpinner.getValueFactory()
-         */
         // this.circuit = new ControlCircuit( map );
-        this.circuit = new MultiThreadCircuit( map,
-                ORIGINAL_POPULATION,
-                crossoverSpinner.getValueFactory(),
-                mutIntensitySpinner.getValueFactory(),
-                muteRateSpinner.getValueFactory() );
+        this.circuit = new MultiThreadCircuit( map, ORIGINAL_POPULATION, genetic );
         GameLoop loop = new GameLoop(circuit);
 
         BorderPane wrapper = new BorderPane();
@@ -114,7 +108,7 @@ public class Main extends Application
         } );
         toggleRenderDeadCarButton.setOnMouseClicked( event -> map.toggleRenderDeadCars() );
         testMapButton.setOnMouseClicked( event -> {
-            map.setTestMap();
+            map.setParams( MapParams.TEST );
             circuit.testGeneration();
         } );
         saveModelButton.setOnMouseClicked( event -> circuit.saveSelectedCar() );

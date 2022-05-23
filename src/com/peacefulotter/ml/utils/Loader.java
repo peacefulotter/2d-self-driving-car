@@ -25,7 +25,7 @@ public class Loader
         return getClass().getResourceAsStream( resourceName );
     }
 
-    public Matrix2d loadHitboxMap( String path, double width, double height )
+    public Matrix2d loadHitbox( String path, double width, double height )
     {
         Image img = new Image( path, width, height, false, false );
         PixelReader reader = img.getPixelReader();

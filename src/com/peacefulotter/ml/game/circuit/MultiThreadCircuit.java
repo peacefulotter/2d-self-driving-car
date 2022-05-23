@@ -1,5 +1,7 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.circuit;
 
+import com.peacefulotter.ml.game.Map;
+import com.peacefulotter.ml.ia.Genetic;
 import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
@@ -12,12 +14,9 @@ public class MultiThreadCircuit extends Circuit
 
     private final List<ThreadedCircuit> threadedCircuits;
 
-    public MultiThreadCircuit( Map map, int population,
-                               SpinnerValueFactory<Double> crossRate,
-                               SpinnerValueFactory<Double> mutStrength,
-                               SpinnerValueFactory<Double> mutRate )
+    public MultiThreadCircuit(Map map, int population, Genetic genetic )
     {
-        super( map, population, crossRate, mutStrength, mutRate );
+        super( map, population, genetic );
 
         this.threadedCircuits = new ArrayList<>();
 
@@ -33,6 +32,8 @@ public class MultiThreadCircuit extends Circuit
 
         int rest = population % THREADS;
         addThreadedCircuit( startPop, endPop + rest );
+
+        System.out.println("Working on " + THREADS + " threads");
     }
 
     private void addThreadedCircuit( int startPop, int endPop )

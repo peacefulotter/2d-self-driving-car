@@ -27,6 +27,30 @@ public class Genetic
     }
 
 
+    private List<IACar> getCrossoverParents( List<IACar> parents )
+    {
+        // full parents = parents + their crossover
+        List<IACar> fullParents = new ArrayList<>();
+        int nbParents = parents.size();
+        for ( int i = 0; i < nbParents; i++ )
+        {
+            // add default parents
+            IACar parent = parents.get( i );
+            IACar copyParent = new IACar( parent.getCopyNN() ).setParent();
+            fullParents.add( copyParent ); // copy nn?
+
+            // and crossover them
+            for ( int j = 0; j < i; j++ )
+            {
+                IACar otherParent = parents.get( j );
+                NeuralNetwork crossNN = crossover( parent, otherParent );
+                IACar crossedParent = new IACar( crossNN ).setCrossedParent();
+                fullParents.add( crossedParent );
+            }
+        }
+        return fullParents;
+    }
+
     /**
      * Crossover the parents and mutate them to obtain their children
      * FIXME: does not guarantee at all to obtain a population of size newPopulation
@@ -36,54 +60,29 @@ public class Genetic
     public List<IACar> nextGeneration( List<IACar> parents, int newPopulation )
     {
         List<IACar> cars = new ArrayList<>();
-        // parents = default parents + their crossover
-        List<IACar> fullParents = new ArrayList<>();
-        for ( int i = 0; i < parents.size(); i++ )
-        {
-            // add default parents
-            IACar parent = parents.get( i );
-            // FIXME: UNSURE: parents.add( new IACar( parent.getCopyNN() ) );
-            fullParents.add( parent );
+        List<IACar> fullParents = getCrossoverParents(parents);
 
-            // and crossover all parents
-            for ( int j = 0; j < i; j++ )
-            {
-                IACar otherParent = parents.get( j );
-                NeuralNetwork crossNN = crossover( parent, otherParent );
-                IACar crossedParent = new IACar( crossNN );
-                crossedParent.setCrossedParent();
-                fullParents.add( crossedParent );
-            }
-        }
         int parentSize = fullParents.size();
-        System.out.println(parentSize + " parent(s) after crossover");
+        int childrenPopulation = newPopulation - parentSize;
+        int childrenPerParent = childrenPopulation / parentSize;
+        System.out.println("new population: " + newPopulation + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
 
         // Mutation = mutate all the parents and add them to the population
         // all parents get an equivalent size of children
-        int oldPopulation = cars.size();
-        int childrenMaxPopulation = newPopulation - parentSize;
-        int childrenPerParent = childrenMaxPopulation / parentSize;
-        System.out.println("new population: " + newPopulation + ", old population: " + cars.size() + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
-
-        int carsIndex = 0;
-        for ( IACar parent : fullParents )
-            for ( int j = 0; j < childrenPerParent; j++ )
-                addMutatedParent( cars, parent );
-
-        // if there is still room for new cars, complete the population
-        if ( carsIndex < childrenMaxPopulation )
+        int i = 0;
+        while ( i++ < childrenPopulation )
         {
-            IACar mainParent = fullParents.get( 0 );
-            for ( int i = carsIndex; i < childrenMaxPopulation; i++ )
-                addMutatedParent( cars, mainParent );
+            IACar parent = fullParents.get( i % parentSize );
+            addMutatedParent( cars, parent );
         }
 
-        // add the parents (NOT MUTATED) at the end so that they appear in front of the other cars
+        // add the parents at the end to make them appear in front of the others
         cars.addAll( fullParents );
 
         return cars;
     }
 
+    // TODO: TEST MULTIPLE CROSSOVER FUNCTIONS
 
     /*private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
@@ -94,8 +93,6 @@ public class Genetic
                 return a.getAt( i, j );
         } );
     }*/
-
-    // FIXME: FIND GOOD CROSSOVER FUNCTION
     private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {

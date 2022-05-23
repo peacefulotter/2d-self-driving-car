@@ -1,6 +1,6 @@
 package com.peacefulotter.ml.utils;
 
-import com.peacefulotter.ml.game.Car;
+import com.peacefulotter.ml.game.car.Car;
 import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -15,26 +15,25 @@ public abstract class Input
         KeyCode key = keyEvent.getCode();
         keyEvent.consume(); // stops the event propagation.
 
-        switch ( key )
-        {
-            case UP:
-                car.accelerate( 1 );
-                vector.setX( 1 );
-                break;
-            case RIGHT:
-                car.turn( 1 );
-                vector.setY( 1 );
-                break;
-            case DOWN:
-                car.accelerate( -1 );
-                vector.setX( -1 );
-                break;
-            case LEFT:
-                car.turn( -1 );
-                vector.setY( -1 );
-                break;
-            default:
-                break;
+        switch (key) {
+            case UP -> {
+                car.accelerate(1);
+                vector.setX(1);
+            }
+            case RIGHT -> {
+                car.turn(1);
+                vector.setY(1);
+            }
+            case DOWN -> {
+                car.accelerate(-1);
+                vector.setX(-1);
+            }
+            case LEFT -> {
+                car.turn(-1);
+                vector.setY(-1);
+            }
+            default -> {
+            }
         }
     }
 
@@ -43,20 +42,17 @@ public abstract class Input
         KeyCode key = keyEvent.getCode();
         keyEvent.consume(); // stops the event propagation.
 
-        switch ( key )
-        {
-            case UP:
-            case DOWN:
-                car.accelerate( 0 );
-                vector.setX( 0 );
-                break;
-            case RIGHT:
-            case LEFT:
-                car.turn( 0 );
-                vector.setY( 0 );
-                break;
-            default:
-                break;
+        switch (key) {
+            case UP, DOWN -> {
+                car.accelerate(0);
+                vector.setX(0);
+            }
+            case RIGHT, LEFT -> {
+                car.turn(0);
+                vector.setY(0);
+            }
+            default -> {
+            }
         }
     }
 

@@ -1,5 +1,6 @@
-package com.peacefulotter.ml.game;
+package com.peacefulotter.ml.game.car;
 
+import com.peacefulotter.ml.game.circuit.Circuit;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.CacheHint;
@@ -7,10 +8,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Car
 {
@@ -18,9 +15,6 @@ public class Car
     private static final double CAR_WIDE = 21.5;
     private static final double CAR_INNER_LENGTH = 40; // reduced car length
     private static final double CAR_INNER_WIDE = 18; // car wide without mirrors
-    private static final int CAR_POSITION_X = 325;
-    private static final int CAR_POSITION_Y = 345;
-    private static final int CAR_ANGLE = -55;
 
     private static final double SPEED_EASE = 4;
     private static final double ANGLE_EASE = 500; // 300 USER_CONTROL;
@@ -30,46 +24,37 @@ public class Car
     private static final double BRAKING_FACTOR = 0.2;
     private static final double TURN_DEGREE = 0.2;
 
-    private static final Vector2d DEFAULT_POSITION = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
-    private static final Vector2d DEFAULT_DIRECTION = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( -CAR_LENGTH / 2, -CAR_WIDE / 2 );
 
     private static final Image CAR_IMG = new Image( "/img/car.png", CAR_LENGTH, CAR_WIDE, false, false );
 
     public static Matrix2d hitbox;
+    public static Vector2d ORIGIN_POSITION;
+    public static double ORIGIN_ANGLE;
+
 
     private final ImageView car;
     protected final Arrows arrows;
 
 
-    private CarColor colorEffect = CarColor.NO_COLOR;
+    protected CarColor colorEffect = CarColor.NO_COLOR;
     private Vector2d position, direction;
     protected double speed, acceleration, angle, angleSpeed;
-    private boolean alive, selected, isParent, isReset, colorChanged;
-
-    private enum CarColor
-    {
-        NO_COLOR(0, 0, 0, 0),
-        SELECTED_COLOR( 0.6, 1, 0.5, 1 ),
-        PARENT_COLOR( -0.6, 0.7, 0.4, 1 ),
-        CROSSED_PARENT( 0.3, 1, 0.8, 1 ),
-        DEAD_COLOR( 0.95, 0.2, 0.1, 0.4 );
-
-        private final ColorAdjust color;
-
-        CarColor( double hue, double saturation, double brightness, double contrast)
-        {
-            color = new ColorAdjust(hue, saturation, brightness, contrast);
-        }
-
-        protected ColorAdjust getColor() { return color; }
-    }
+    protected boolean alive;
+    protected boolean selected;
+    private boolean isReset;
+    protected boolean colorChanged;
 
     public Car( int nbArrows, boolean drawArrows )
     {
-        this.arrows = new Arrows( hitbox, nbArrows, drawArrows, DEFAULT_DIRECTION );
+        this.arrows = new Arrows( hitbox, nbArrows, drawArrows, getOriginDirection() );
         this.car = createImageView();
         resetCar();
+    }
+
+    private Vector2d getOriginDirection()
+    {
+        return new Vector2d( 1, 0 ).rotate( ORIGIN_ANGLE );
     }
 
     /**
@@ -90,12 +75,11 @@ public class Car
     {
         partialReset();
 
-        angle = CAR_ANGLE;
-        position = DEFAULT_POSITION;
-        direction = DEFAULT_DIRECTION;
+        angle = ORIGIN_ANGLE;
+        position = ORIGIN_POSITION;
+        direction = getOriginDirection();
         alive = true;
         selected = false;
-        isParent = false;
         isReset = false;
         colorChanged = true;
         colorEffect = CarColor.NO_COLOR;
@@ -121,19 +105,6 @@ public class Car
             return 0;
         }
         return speed;
-    }
-
-    public void setParent()
-    {
-        this.isParent = true;
-        colorEffect = CarColor.PARENT_COLOR;
-        colorChanged = true;
-    }
-
-    public void setCrossedParent()
-    {
-        colorEffect = CarColor.CROSSED_PARENT;
-        colorChanged = true;
     }
 
     private boolean checkCornerHitbox( Vector2d corner )
@@ -198,14 +169,8 @@ public class Car
 
         alive = checkHitbox();
 
-        if ( !alive ) {
-            if (!isParent && !selected)
-            {
-                colorEffect = CarColor.DEAD_COLOR;
-                colorChanged = true;
-            }
+        if ( !alive )
             car.setOpacity(0.4);
-        }
     }
 
     public void render( GraphicsContext ctx )
@@ -234,10 +199,12 @@ public class Car
         img.setCacheHint( CacheHint.SPEED );
         img.setOnMouseClicked( ( event ) -> {
             selected = !selected;
-            Circuit.addSelectedParent(selected ? 1 : -1);
-            colorEffect = selected ?
-                    CarColor.SELECTED_COLOR :
-                    alive ? CarColor.NO_COLOR : CarColor.DEAD_COLOR;
+            Circuit.addSelected(selected ? 1 : -1);
+            colorEffect = selected
+                    ? CarColor.SELECTED_COLOR
+                    :  alive
+                        ? CarColor.NO_COLOR
+                        : CarColor.DEAD_COLOR;
             colorChanged = true;
         } );
         return img;

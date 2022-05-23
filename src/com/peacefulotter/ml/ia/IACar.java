@@ -1,12 +1,12 @@
 package com.peacefulotter.ml.ia;
 
-import com.peacefulotter.ml.game.Car;
+import com.peacefulotter.ml.game.car.Car;
+import com.peacefulotter.ml.game.car.CarColor;
 import com.peacefulotter.ml.ia.activation.ActivationFunc;
 import com.peacefulotter.ml.ia.activation.Activations;
 import com.peacefulotter.ml.ia.loss.Loss;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.utils.Loader;
-import javafx.scene.image.ImageView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +24,7 @@ public class IACar extends Car
     private static final boolean DRAW_ARROWS = false;
 
     private NeuralNetwork nn;
+    private boolean isParent;
 
     public IACar()
     {
@@ -40,6 +41,38 @@ public class IACar extends Car
     {
         super( ARROWS, DRAW_ARROWS );
         this.nn = nn;
+    }
+
+    @Override
+    public void resetCar() {
+        super.resetCar();
+        isParent = false;
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+
+        if ( !alive && !isParent && !selected)
+        {
+            colorEffect = CarColor.DEAD_COLOR;
+            colorChanged = true;
+        }
+    }
+
+    public IACar setParent()
+    {
+        isParent = true;
+        colorEffect = CarColor.PARENT_COLOR;
+        colorChanged = true;
+        return this;
+    }
+
+    public IACar setCrossedParent()
+    {
+        colorEffect = CarColor.CROSSED_PARENT;
+        colorChanged = true;
+        return this;
     }
 
     /**
