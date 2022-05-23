@@ -8,13 +8,9 @@ Neural networks that evolve using genetic algorithm. Cars that drove the best ar
 ## Requirements
 - JavaFX
 
-## Bugs
-- IllegalArgument sometimes when creating a new gen
-- Parents are not properly included in the next gen
-
 ## Future work
 - Make the selection automatic
-- Add bonuses to encourage the network to use certain driving lines that are optimized for speed
+- Add rewards to encourage the network to take certain driving lines and thus optimize speed
 
 
 
