@@ -9,6 +9,7 @@ import com.peacefulotter.ml.utils.Loader;
 import javafx.scene.image.ImageView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -49,9 +50,10 @@ public class IACar extends Car
     {
         Matrix2d data = new Matrix2d( 1, DIMENSIONS[0] );
         // arrows length
-        int nbArrows = arrows.size();
+        List<Double> arrowLengths = arrows.getLengths();
+        int nbArrows = arrowLengths.size();
         for (int i = 0; i < nbArrows; i++)
-            data.setAt( 0, i, arrows.get( i ).getLength() );
+            data.setAt( 0, i, arrowLengths.get(i) );
         // additional data
         data.setAt( 0, nbArrows, speed );
         data.setAt( 0, nbArrows + 1, acceleration );

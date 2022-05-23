@@ -7,16 +7,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Car
 {
-    private static final int CAR_WIDTH = 43;
-    private static final int CAR_HEIGHT = 21;
-    private static final int CAR_POSITION_X = 425;
-    private static final int CAR_POSITION_Y = 480;
+    private static final double CAR_LENGTH = 43.333;
+    private static final double CAR_WIDE = 21.5;
+    private static final double CAR_INNER_LENGTH = 40; // reduced car length
+    private static final double CAR_INNER_WIDE = 18; // car wide without mirrors
+    private static final int CAR_POSITION_X = 325;
+    private static final int CAR_POSITION_Y = 345;
     private static final int CAR_ANGLE = -55;
 
     private static final double SPEED_EASE = 4;
@@ -29,15 +32,15 @@ public class Car
 
     private static final Vector2d DEFAULT_POSITION = new Vector2d( CAR_POSITION_X, CAR_POSITION_Y );
     private static final Vector2d DEFAULT_DIRECTION = new Vector2d( 1, 0 ).rotate( CAR_ANGLE );
-    private static final Vector2d SHIFT_ORIGIN = new Vector2d( CAR_WIDTH / 2f, CAR_HEIGHT / 2f );
+    private static final Vector2d SHIFT_ORIGIN = new Vector2d( -CAR_LENGTH / 2, -CAR_WIDE / 2 );
 
-    private static final Image CAR_IMG = new Image( "/img/car.png", CAR_WIDTH, CAR_HEIGHT, true, false );
+    private static final Image CAR_IMG = new Image( "/img/car.png", CAR_LENGTH, CAR_WIDE, false, false );
 
     public static Matrix2d hitbox;
 
     private final ImageView car;
-    private final boolean drawArrows;
-    protected final List<Arrow> arrows;
+    protected final Arrows arrows;
+
 
     private CarColor colorEffect = CarColor.NO_COLOR;
     private Vector2d position, direction;
@@ -64,19 +67,7 @@ public class Car
 
     public Car( int nbArrows, boolean drawArrows )
     {
-        this.arrows = new ArrayList<>();
-        this.drawArrows = drawArrows;
-
-        // initialize the 5 arrows
-        int baseAngle = -90;
-        int shiftAngle = -2 * baseAngle / ( nbArrows - 1 );
-        for ( int i = 0; i < nbArrows; i++ )
-        {
-            int angle = baseAngle + i * shiftAngle;
-            this.arrows.add( new Arrow( hitbox, DEFAULT_DIRECTION, angle ) );
-        }
-
-        // initialize the car image
+        this.arrows = new Arrows( hitbox, nbArrows, drawArrows, DEFAULT_DIRECTION );
         this.car = createImageView();
         resetCar();
     }
@@ -145,14 +136,33 @@ public class Car
         colorChanged = true;
     }
 
+    private boolean checkCornerHitbox( Vector2d corner )
+    {
+        int x = (int) corner.getX();
+        int y = (int) corner.getY();
+
+        return x >= 0 && x < hitbox.cols &&
+                y >= 0 && y < hitbox.rows &&
+                hitbox.getAt( y, x ) == 1;
+    }
+
     private boolean checkHitbox()
     {
-        Vector2d center = position.add( SHIFT_ORIGIN );
-        int x = (int) center.getX();
-        int y = (int) center.getY();
-        if ( x < 0 || x >= hitbox.cols || y < 0 || y >= hitbox.rows )
-            return false;
-        return hitbox.getAt( y, x ) == 1;
+        Vector2d topLeft = new Vector2d( CAR_INNER_LENGTH / 2d, -CAR_INNER_WIDE / 2d )
+                .rotate( angle )
+                .add( position );
+        Vector2d topRight = new Vector2d( CAR_INNER_LENGTH / 2d, CAR_INNER_WIDE / 2d )
+                .rotate( angle )
+                .add( position );
+        Vector2d bottomLeft = new Vector2d( -CAR_INNER_LENGTH / 2d, -CAR_INNER_WIDE / 2d )
+                .rotate( angle )
+                .add( position );
+        Vector2d bottomRight = new Vector2d( -CAR_INNER_LENGTH / 2d, CAR_INNER_WIDE / 2d )
+                .rotate( angle )
+                .add( position );
+
+        return checkCornerHitbox(topLeft) && checkCornerHitbox(topRight) &&
+                checkCornerHitbox(bottomLeft) && checkCornerHitbox(bottomRight);
     }
 
     public void accelerate( double acc )
@@ -184,8 +194,7 @@ public class Car
 
         position = position.add( direction.mul( speed ) );
 
-        for ( Arrow arrow : arrows )
-            arrow.updateParams( position.add( SHIFT_ORIGIN ), angle );
+        this.arrows.update( position, angle );
 
         alive = checkHitbox();
 
@@ -211,13 +220,11 @@ public class Car
         // don't update the car rendering if it is dead
         if ( isDead() ) return;
 
-        car.setTranslateX( position.getX() );
-        car.setTranslateY( position.getY() );
+        car.setTranslateX( position.getX() + SHIFT_ORIGIN.getX() );
+        car.setTranslateY( position.getY() + SHIFT_ORIGIN.getY()  );
         car.setRotate( angle );
 
-        if ( drawArrows )
-            for ( Arrow arrow : arrows )
-                arrow.draw( ctx );
+        this.arrows.render( ctx );
     }
 
     private ImageView createImageView()

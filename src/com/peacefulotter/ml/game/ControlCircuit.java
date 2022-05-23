@@ -13,6 +13,7 @@ import java.util.List;
 
 public class ControlCircuit extends Circuit
 {
+    private static final boolean SAVING = false;
     private static final int SAVE_THRESHOLD = 2000;
 
     private static final List<Matrix2d> positions = new ArrayList<>();
@@ -21,9 +22,10 @@ public class ControlCircuit extends Circuit
     private static final IACar car = new IACar( 5, true );
 
 
-    public ControlCircuit( Map map, int population, SpinnerValueFactory<Double> crossRate, SpinnerValueFactory<Double> mutStrength, SpinnerValueFactory<Double> mutRate )
+    public ControlCircuit( Map map )
     {
-        super( map, 0, crossRate, mutStrength, mutRate );
+        super( map, 0, null, null, null );
+
         map.addCarToMap( car.getCarImgView() );
 
         // Used to control a car - only to test or add new features in the future
@@ -41,15 +43,18 @@ public class ControlCircuit extends Circuit
         car.turn( y.getY() );
         car.update( deltaTime );
 
-        positions.add( x );
-        controls.add( y.copy() );
-
-        if ( positions.size() > SAVE_THRESHOLD )
+        if ( SAVING )
         {
-            Loader.saveDrivingData( positions, controls );
-            System.out.println("SAVED");
-            positions.clear();
-            controls.clear();
+            positions.add( x );
+            controls.add( y.copy() );
+
+            if ( positions.size() > SAVE_THRESHOLD )
+            {
+                Loader.saveDrivingData( positions, controls );
+                System.out.println("SAVED");
+                positions.clear();
+                controls.clear();
+            }
         }
     }
 

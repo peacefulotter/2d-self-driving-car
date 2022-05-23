@@ -1,10 +1,8 @@
 package com.peacefulotter.ml.game;
 
 
-import com.google.gson.GsonBuilder;
 import com.peacefulotter.ml.ia.IACar;
 import com.peacefulotter.ml.utils.Loader;
-import com.peacefulotter.ml.utils.Logger;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -28,7 +26,7 @@ public class Map extends StackPane
     private final Canvas canvas;
     private final GraphicsContext ctx;
 
-    private ImageView circuitImage;
+    private final ImageView circuitImage;
 
     private boolean showDeadCars = true;
 

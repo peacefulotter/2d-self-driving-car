@@ -212,8 +212,7 @@ public class Matrix2d
         return sj.toString();
     }
 
-    @Override
-    public String toString()
+    public String toString( int _i, int _j )
     {
         StringJoiner main = new StringJoiner("\n", "[", "]");
         for ( int i = 0; i < rows; i++ )
@@ -221,10 +220,19 @@ public class Matrix2d
             StringJoiner sj = new StringJoiner(", ", "[", "]");
             for ( int j = 0; j < cols; j++ )
             {
-                sj.add( String.valueOf( m[i][j] ) );
+                if ( _i == i && _j == j)
+                    sj.add( "X" );
+                else
+                    sj.add( String.valueOf( m[i][j] ) );
             }
             main.add( sj.toString() );
         }
         return main.toString();
+    }
+
+    @Override
+    public String toString()
+    {
+        return toString( -1, -1 );
     }
 }

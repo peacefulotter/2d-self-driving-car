@@ -19,8 +19,8 @@ import static com.peacefulotter.ml.game.MultiThreadCircuit.THREADS;
 
 public class Main extends Application
 {
-    private static final int CIRCUIT_WIDTH = 1080;
-    private static final int CIRCUIT_HEIGHT = 815;
+    private static final int CIRCUIT_WIDTH = 794;
+    private static final int CIRCUIT_HEIGHT = 599;
     private static final int MIN_CANVAS_WIDTH = CIRCUIT_WIDTH;
     private static final int MIN_CANVAS_HEIGHT = CIRCUIT_HEIGHT + 120;
 
@@ -62,17 +62,26 @@ public class Main extends Application
             new MultiThreadCircuit(...) --> runs on multiple threads
             new ControlCircuit(...) --> be able to control a car on the circuit
          */
-        this.circuit = new MultiThreadCircuit( map, ORIGINAL_POPULATION,
+        /*
+        ORIGINAL_POPULATION,
                 crossoverSpinner.getValueFactory(),
                 mutIntensitySpinner.getValueFactory(),
-                muteRateSpinner.getValueFactory());
+                muteRateSpinner.getValueFactory()
+         */
+        // this.circuit = new ControlCircuit( map );
+        this.circuit = new MultiThreadCircuit( map,
+                ORIGINAL_POPULATION,
+                crossoverSpinner.getValueFactory(),
+                mutIntensitySpinner.getValueFactory(),
+                muteRateSpinner.getValueFactory() );
         GameLoop loop = new GameLoop(circuit);
 
         BorderPane wrapper = new BorderPane();
-        wrapper.setTop( map );
+        wrapper.setLeft( map );
         wrapper.setBottom( buildBottomTab() );
         window.setMinWidth( MIN_CANVAS_WIDTH );
         window.setMinHeight( MIN_CANVAS_HEIGHT );
+        window.setResizable(false);
         window.setScene( new Scene( wrapper ) );
         window.show();
 

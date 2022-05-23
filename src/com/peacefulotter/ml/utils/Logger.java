@@ -1,9 +1,6 @@
 package com.peacefulotter.ml.utils;
 
 import com.google.gson.*;
-import com.peacefulotter.ml.ia.IACar;
-
-import java.lang.reflect.Type;
 
 /** FIXME: NOT WORKING **/
 public class Logger

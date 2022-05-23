@@ -128,4 +128,9 @@ public class Vector2d
     {
         return "(" + x + ":" + y + ")";
     }
+
+    public String toStringInt()
+    {
+        return "(" + (int) x + ":" + (int) y + ")";
+    }
 }
