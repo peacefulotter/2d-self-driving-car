@@ -50,7 +50,8 @@ public class IACar extends Car
     }
 
     @Override
-    public void update(float deltaTime) {
+    public void update(float deltaTime)
+    {
         super.update(deltaTime);
 
         if ( !alive && !isParent && !selected)

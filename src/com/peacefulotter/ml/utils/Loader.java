@@ -131,6 +131,7 @@ public class Loader
 
         try (PrintWriter pw = new PrintWriter("res/" + carIndex + "_car.csv"))
         {
+            pw.println("x,y,speed,acceleration");
             samples.stream()
                 .map( Record.Sample::convertToCSV  )
                 .forEach( pw::println );

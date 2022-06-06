@@ -32,11 +32,11 @@ public class Circuit
     private final Genetic genetic;
     protected final Map map;
 
-    private List<IACar> cars;
     private double speed;
     private int generation;
     private int deadCars;
 
+    protected List<IACar> cars;
     protected int population;
 
     public Circuit( Map map, Spinners spinners )
@@ -68,8 +68,6 @@ public class Circuit
         map.addCarToMap( car );
     }
 
-    public void update( float deltaTime ) { update( deltaTime, 0, population ); }
-
     public void recordParentGeneration()
     {
         List<IACar> parents = getGenParents().stream().map( parent -> {
@@ -83,11 +81,14 @@ public class Circuit
 
     public void saveRecordedParents()
     {
+        System.out.println("SAVE RECORDED");
         for ( int i = 0; i < cars.size(); i++ )
         {
-            Loader.saveRecording(  i, ((RecordCar) cars.get( i )).getRecording() );
+            Loader.saveRecording(  i, ((RecordCar)cars.get( i )).getRecording() );
         }
     }
+
+    public void update( float deltaTime ) { update( deltaTime, 0, population ); }
 
     public void nextGeneration( int newPopulation )
     {
@@ -105,12 +106,14 @@ public class Circuit
 
         // apply crossovers to the parents
         // and generate the new population by mutating the crossed parents
-        cars = genetic.nextGeneration( parents, generation + 1, newPopulation );
-        createGeneration( cars );
+        List<IACar> newCars = genetic.nextGeneration( parents, generation + 1, newPopulation );
+        createGeneration( newCars );
     }
 
-    private void createGeneration( List<IACar> cars)
+    void createGeneration( List<IACar> newCars )
     {
+        cars = newCars;
+
         // clear the map and add the new cars
         map.remove( 0, population );
         for ( IACar car: cars )
@@ -125,7 +128,7 @@ public class Circuit
     }
 
     // the selected cars become the parents for the next generation
-    private List<IACar> getGenParents()
+    List<IACar> getGenParents()
     {
         return cars.stream()
                 .filter(Car::isSelected)

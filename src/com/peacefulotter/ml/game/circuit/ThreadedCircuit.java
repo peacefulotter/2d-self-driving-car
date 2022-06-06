@@ -26,16 +26,6 @@ public class ThreadedCircuit extends Thread
         this.endPop = endPop;
     }
 
-    public void recordParentGeneration()
-    {
-        circuit.recordParentGeneration();
-    }
-
-    public void saveRecordedParents()
-    {
-        circuit.saveRecordedParents();
-    }
-
     @Override
     public void run()
     {

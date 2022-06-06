@@ -13,6 +13,8 @@ public class MultiThreadCircuit extends Circuit
 
     private final List<ThreadedCircuit> threadedCircuits;
 
+    private boolean isRecording;
+
     public MultiThreadCircuit(Map map, Spinners spinners )
     {
         super( map, spinners );
@@ -62,7 +64,13 @@ public class MultiThreadCircuit extends Circuit
     @Override
     public void update( float deltaTime )
     {
-        threadedCircuits.forEach( tc -> tc.update(deltaTime) );
+        if ( isRecording )
+        {
+            super.update( deltaTime );
+        } else
+        {
+            threadedCircuits.forEach( tc -> tc.update( deltaTime ) );
+        }
     }
 
     @Override
@@ -80,12 +88,14 @@ public class MultiThreadCircuit extends Circuit
     @Override
     public void recordParentGeneration()
     {
-        threadedCircuits.forEach( ThreadedCircuit::recordParentGeneration );
+        super.recordParentGeneration();
+        isRecording = true;
     }
 
     @Override
     public void saveRecordedParents()
     {
-        threadedCircuits.forEach( ThreadedCircuit::saveRecordedParents );
+        super.saveRecordedParents();
+        isRecording = false;
     }
 }

@@ -28,3 +28,5 @@ test/
 /libs/
 *.iml
 *.xml
+
+.ipynb_checkpoints/
