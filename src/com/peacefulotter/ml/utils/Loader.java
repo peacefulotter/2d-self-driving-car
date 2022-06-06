@@ -2,6 +2,7 @@ package com.peacefulotter.ml.utils;
 
 import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.ia.NeuralNetwork;
+import com.peacefulotter.ml.ia.Record;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.image.Image;
@@ -121,5 +122,21 @@ public class Loader
     public void saveModel( NeuralNetwork nn )
     {
         System.out.println("/!\\ TODO: SAVE THE NN TO A FILE");
+    }
+
+
+    public static void saveRecording( int carIndex, List<Record.Sample> samples )
+    {
+        System.out.println(carIndex + " " + samples.size());
+
+        try (PrintWriter pw = new PrintWriter("res/" + carIndex + "_car.csv"))
+        {
+            samples.stream()
+                .map( Record.Sample::convertToCSV  )
+                .forEach( pw::println );
+        } catch ( IOException e )
+        {
+            e.printStackTrace();
+        }
     }
 }

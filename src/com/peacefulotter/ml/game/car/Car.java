@@ -13,8 +13,8 @@ public class Car
 {
     private static final double CAR_LENGTH = 43.333;
     private static final double CAR_WIDE = 21.5;
-    private static final double CAR_INNER_LENGTH = 40; // reduced car length
-    private static final double CAR_INNER_WIDE = 18; // car wide without mirrors
+    private static final double CAR_INNER_LENGTH = 39; // reduced car length
+    private static final double CAR_INNER_WIDE = 17; // car wide without mirrors
 
     private static final double SPEED_EASE = 4;
     private static final double ANGLE_EASE = 500; // 300 USER_CONTROL;
@@ -25,25 +25,23 @@ public class Car
     private static final double TURN_DEGREE = 0.2;
 
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( -CAR_LENGTH / 2, -CAR_WIDE / 2 );
-
     private static final Image CAR_IMG = new Image( "/img/car.png", CAR_LENGTH, CAR_WIDE, false, false );
+    private static final double DEAD_OPACITY = 0.3;
 
     public static Matrix2d hitbox;
     public static Vector2d ORIGIN_POSITION;
     public static double ORIGIN_ANGLE;
 
-
     private final ImageView car;
     protected final Arrows arrows;
 
+    private Vector2d direction;
+    private boolean isReset;
 
     protected CarColor colorEffect = CarColor.NO_COLOR;
-    private Vector2d position, direction;
+    protected Vector2d position;
     protected double speed, acceleration, angle, angleSpeed;
-    protected boolean alive;
-    protected boolean selected;
-    private boolean isReset;
-    protected boolean colorChanged;
+    protected boolean alive, selected, colorChanged;
 
     public Car( int nbArrows, boolean drawArrows )
     {
@@ -170,7 +168,7 @@ public class Car
         alive = checkHitbox();
 
         if ( !alive )
-            car.setOpacity(0.4);
+            car.setOpacity( DEAD_OPACITY );
     }
 
     public void render( GraphicsContext ctx )

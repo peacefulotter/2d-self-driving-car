@@ -2,6 +2,7 @@ package com.peacefulotter.ml.game;
 
 import com.peacefulotter.ml.Main;
 import com.peacefulotter.ml.game.circuit.Circuit;
+import com.peacefulotter.ml.ui.BottomPanel;
 import com.peacefulotter.ml.utils.Time;
 import javafx.animation.AnimationTimer;
 
@@ -51,7 +52,7 @@ public class GameLoop extends AnimationTimer
 
             if (framesCounter >= Time.SECOND)
             {
-                Main.setFPS(frames);
+                BottomPanel.setFPS(frames);
                 frames = 0;
                 framesCounter = 0;
             }

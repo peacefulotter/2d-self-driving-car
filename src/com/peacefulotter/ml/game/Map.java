@@ -25,9 +25,9 @@ public class Map extends StackPane
 
     private boolean showDeadCars = true;
 
-    public Map( Canvas canvas, MapParams params )
+    public Map( int width, int height, MapParams params )
     {
-        this.canvas = canvas;
+        this.canvas = new Canvas( width, height );
         this.ctx = canvas.getGraphicsContext2D();
 
         circuitImage = new ImageView();
@@ -35,7 +35,6 @@ public class Map extends StackPane
         circuitImage.setY( 0 );
         circuitImage.setFitWidth( canvas.getWidth() );
         circuitImage.setFitHeight( canvas.getHeight() );
-        circuitImage.setStyle(  "-fx-spacing: 4; -fx-padding: 3px;" );
         circuitImage.setPreserveRatio( true );
 
         setParams(params);

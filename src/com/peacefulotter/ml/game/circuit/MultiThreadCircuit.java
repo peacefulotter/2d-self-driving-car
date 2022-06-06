@@ -1,8 +1,7 @@
 package com.peacefulotter.ml.game.circuit;
 
 import com.peacefulotter.ml.game.Map;
-import com.peacefulotter.ml.ia.Genetic;
-import javafx.scene.control.SpinnerValueFactory;
+import com.peacefulotter.ml.ui.Spinners;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +13,9 @@ public class MultiThreadCircuit extends Circuit
 
     private final List<ThreadedCircuit> threadedCircuits;
 
-    public MultiThreadCircuit(Map map, int population, Genetic genetic )
+    public MultiThreadCircuit(Map map, Spinners spinners )
     {
-        super( map, population, genetic );
+        super( map, spinners );
 
         this.threadedCircuits = new ArrayList<>();
 
@@ -63,10 +62,7 @@ public class MultiThreadCircuit extends Circuit
     @Override
     public void update( float deltaTime )
     {
-        for ( ThreadedCircuit tc: threadedCircuits )
-        {
-            tc.update( deltaTime );
-        }
+        threadedCircuits.forEach( tc -> tc.update(deltaTime) );
     }
 
     @Override
@@ -79,5 +75,17 @@ public class MultiThreadCircuit extends Circuit
         {
             setPopulation( newPopulation );
         }
+    }
+
+    @Override
+    public void recordParentGeneration()
+    {
+        threadedCircuits.forEach( ThreadedCircuit::recordParentGeneration );
+    }
+
+    @Override
+    public void saveRecordedParents()
+    {
+        threadedCircuits.forEach( ThreadedCircuit::saveRecordedParents );
     }
 }

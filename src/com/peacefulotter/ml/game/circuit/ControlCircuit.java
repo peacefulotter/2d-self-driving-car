@@ -23,7 +23,7 @@ public class ControlCircuit extends Circuit
 
     public ControlCircuit( Map map )
     {
-        super( map, 0, null );
+        super( map, null );
 
         map.addCarToMap( car );
         map.setOnKeyPressed( keyEvent -> Input.handleKeyPressed( car, keyEvent ) );

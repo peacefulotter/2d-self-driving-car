@@ -1,6 +1,7 @@
 package com.peacefulotter.ml.ia;
 
 import com.peacefulotter.ml.maths.Matrix2d;
+import com.peacefulotter.ml.ui.Spinners;
 import javafx.scene.control.SpinnerValueFactory;
 
 import java.util.ArrayList;
@@ -10,15 +11,11 @@ import java.util.Random;
 
 public class Genetic
 {
-    private final SpinnerValueFactory<Double> crossRate, mutStrength, mutRate;
+    private final Spinners spinners;
 
-    public Genetic( SpinnerValueFactory<Double> crossRate,
-                    SpinnerValueFactory<Double> mutStrength,
-                    SpinnerValueFactory<Double> mutRate )
+    public Genetic( Spinners spinners )
     {
-        this.crossRate = crossRate;
-        this.mutStrength = mutStrength;
-        this.mutRate = mutRate;
+        this.spinners = spinners;
     }
 
     private void addMutatedParent( List<IACar> cars, IACar parent )
@@ -53,11 +50,10 @@ public class Genetic
 
     /**
      * Crossover the parents and mutate them to obtain their children
-     * FIXME: does not guarantee at all to obtain a population of size newPopulation
      * @param parents: selected parents from all the cars
      * @param newPopulation: size of the new population
      */
-    public List<IACar> nextGeneration( List<IACar> parents, int newPopulation )
+    public List<IACar> nextGeneration( List<IACar> parents, int gen, int newPopulation )
     {
         List<IACar> cars = new ArrayList<>();
         List<IACar> fullParents = getCrossoverParents(parents);
@@ -65,7 +61,7 @@ public class Genetic
         int parentSize = fullParents.size();
         int childrenPopulation = newPopulation - parentSize;
         int childrenPerParent = childrenPopulation / parentSize;
-        System.out.println("new population: " + newPopulation + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
+        System.out.println("[" + gen + "] new population: " + newPopulation + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
 
         // Mutation = mutate all the parents and add them to the population
         // all parents get an equivalent size of children
@@ -96,7 +92,7 @@ public class Genetic
     private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < crossRate.getValue() )
+            if ( Math.random() < spinners.getCrossover() )
                 return a.getAt( i, j );
             else
                 return b.getAt( i, j );
@@ -112,8 +108,8 @@ public class Genetic
     private Matrix2d mutation( Matrix2d a )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < mutRate.getValue() )
-                return a.getAt( i, j ) + mutStrength.getValue() * ( new Random().nextDouble() - 0.5f );
+            if ( Math.random() < spinners.getMutRate() )
+                return a.getAt( i, j ) + spinners.getMutIntensity() * ( new Random().nextDouble() - 0.5f );
             else
                 return a.getAt( i, j );
         } );

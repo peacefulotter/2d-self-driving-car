@@ -90,8 +90,6 @@ public class IACar extends Car
         // additional data
         data.setAt( 0, nbArrows, speed );
         data.setAt( 0, nbArrows + 1, acceleration );
-        // data.setAt( 0, nbArrows + 2, angle );
-        // data.setAt( 0, nbArrows + 3, angleSpeed );
 
         return nn.predict( data.normalize() );
     }
