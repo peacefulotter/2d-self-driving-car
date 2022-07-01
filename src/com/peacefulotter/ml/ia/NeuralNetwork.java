@@ -18,6 +18,7 @@ public class NeuralNetwork
     private final int[] dimensions;
     private final ActivationFunc[] activationFuncs;
 
+    // TODO: why from 1 to layers, rather than 0 to layers - 1
     public NeuralNetwork( int[] dimensions, ActivationFunc[] activations )
     {
         this.layers = dimensions.length;
@@ -31,7 +32,7 @@ public class NeuralNetwork
         for (int i = 1; i < this.layers; i++)
         {
             this.w.put(i, Matrix2d.genRandom(dimensions[i - 1], dimensions[i]).div((float)Math.sqrt(dimensions[i-1])));
-            this.b.put(i, new Matrix2d(1, dimensions[i]));
+            this.b.put(i, Matrix2d.genRandom(1, dimensions[i]));
             this.activations.put(i + 1, activations[i - 1] );
         }
     }
@@ -202,4 +203,14 @@ public class NeuralNetwork
     {
         b.put( i, val );
     }
+
+
+    public int getLayers() {
+        return layers;
+    }
+
+    public int[] getDimensions() {
+        return dimensions;
+    }
+
 }

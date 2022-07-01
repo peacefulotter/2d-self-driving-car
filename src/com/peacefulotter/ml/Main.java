@@ -2,9 +2,7 @@ package com.peacefulotter.ml;
 
 import com.peacefulotter.ml.game.*;
 import com.peacefulotter.ml.game.circuit.Circuit;
-import com.peacefulotter.ml.game.circuit.ControlCircuit;
 import com.peacefulotter.ml.game.circuit.MultiThreadCircuit;
-import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.ui.BottomPanel;
 import com.peacefulotter.ml.ui.RightPanel;
 import com.peacefulotter.ml.ui.Spinners;

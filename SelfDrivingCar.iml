@@ -9,8 +9,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="javafx-swt" level="project" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="library" name="javafx-swt" level="project" />
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/../../JavaFX/lib" />
@@ -21,6 +21,44 @@
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../../JavaFX/lib" recursive="false" />
         <jarDirectory url="file://$MODULE_DIR$/../../JavaFX/lib" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../libs/javafx/javafx-base-18-ea+1-linux.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../libs/javafx/javafx-controls-18-ea+1-linux.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../libs/javafx/javafx-graphics-18-ea+1-linux.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../libs/java-json.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../libs/java-json.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

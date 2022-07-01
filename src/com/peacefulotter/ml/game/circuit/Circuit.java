@@ -172,18 +172,9 @@ public class Circuit
 
     public void testGeneration()
     {
-        for (int i = population - 1; i >= 0; i--) {
-            IACar car = cars.get( i );
-            if ( car.isSelected() )
-            {
-                car.resetCar();
-                car.setParent();
-            }
-            else
-            {
-                map.remove( i );
-            }
-        }
+        List<IACar> parents = getGenParents();
+        System.out.println("Testing on " + parents.size() + " parents");
+        createGeneration( parents );
     }
 
     public void saveSelectedCar()

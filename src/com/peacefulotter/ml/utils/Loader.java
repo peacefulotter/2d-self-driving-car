@@ -1,6 +1,5 @@
 package com.peacefulotter.ml.utils;
 
-import com.peacefulotter.ml.ia.Genetic;
 import com.peacefulotter.ml.ia.NeuralNetwork;
 import com.peacefulotter.ml.ia.Record;
 import com.peacefulotter.ml.maths.Matrix2d;
@@ -8,13 +7,15 @@ import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.paint.Color;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class Loader
 {
@@ -119,9 +120,48 @@ public class Loader
         return res;
     }
 
+    private void appendMatrix(JSONObject layer, NeuralNetwork nn, int i) throws JSONException
+    {
+        JSONArray wMatrix = new JSONArray();
+        JSONArray bMatrix = new JSONArray();
+        Matrix2d w = nn.getW(i);
+        Matrix2d b = nn.getB(i);
+        System.out.println(w);
+        System.out.println(b);
+        for (int j = 0; j < w.cols; j++)
+        {
+            JSONArray tempW = new JSONArray();
+            for (int k = 0; k < w.rows; k++) {
+                tempW.put( w.getAt(k, j) );
+            }
+            wMatrix.put( tempW );
+            bMatrix.put( b.getAt(0, j ) );
+        }
+        layer.put( "w", wMatrix );
+        layer.put( "b", bMatrix );
+    }
+
     public void saveModel( NeuralNetwork nn )
     {
-        System.out.println("/!\\ TODO: SAVE THE NN TO A FILE");
+        long id = Math.round(Math.random() * 10000);
+
+        try (PrintWriter pw = new PrintWriter("res/model_" + id + ".json"))
+        {
+            JSONArray json = new JSONArray();
+            for (int i = 1; i < nn.getLayers(); i++)
+            {
+                System.out.println(i + " " + nn.getLayers() + " " + List.of(nn.getDimensions()));
+                JSONObject layer = new JSONObject();
+                appendMatrix(layer,  nn, i);
+                json.put( layer );
+            }
+            pw.println(json);
+        } catch ( IOException e )
+        {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

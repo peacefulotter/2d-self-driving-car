@@ -5,7 +5,7 @@ import com.peacefulotter.ml.maths.Vector2d;
 public enum MapParams {
 
     DEFAULT( "map", "hitbox_map", "rewards", new Vector2d( 325, 345 ), -55 ),
-    TEST( "map_test", "hitbox_map_test", null, new Vector2d( 325, 345 ), -55 );
+    TEST( "map_test", "hitbox_map_test", null, new Vector2d( 475, 230 ), -55 + 180 );
 
     private final String img, hitbox, reward;
     private final Vector2d direction;

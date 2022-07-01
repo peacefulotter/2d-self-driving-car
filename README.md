@@ -7,6 +7,7 @@ Neural networks that evolve using genetic algorithm. Cars that drove the best ar
 
 ## Requirements
 - JavaFX
+- JSONObject: https://stackoverflow.com/questions/8997598/importing-json-into-an-eclipse-project
 
 ## Future work
 - Make the selection automatic
