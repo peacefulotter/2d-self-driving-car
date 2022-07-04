@@ -16,8 +16,8 @@ import java.util.function.Function;
 public class IACar extends Car
 {
     // Neural Network specifications (hyper parameters)
-    public static final int[] DIMENSIONS = new int[] {7, 20, 2};
-    private static final ActivationFunc[] ACTIVATIONS = new ActivationFunc[] {
+    public static final int[] DIMENSIONS = {7, 20, 2};
+    private static final Activations[] ACTIVATIONS = {
             Activations.ReLU, Activations.HyperTan
     };
     private static final int ARROWS = 5;

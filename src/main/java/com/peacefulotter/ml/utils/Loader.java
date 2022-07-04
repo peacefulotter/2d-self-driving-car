@@ -2,6 +2,7 @@ package com.peacefulotter.ml.utils;
 
 import com.peacefulotter.ml.ia.NeuralNetwork;
 import com.peacefulotter.ml.ia.Record;
+import com.peacefulotter.ml.ia.activation.Activations;
 import com.peacefulotter.ml.maths.Matrix2d;
 import com.peacefulotter.ml.maths.Vector2d;
 import javafx.scene.image.Image;
@@ -10,12 +11,14 @@ import javafx.scene.paint.Color;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class Loader
 {
@@ -147,23 +150,51 @@ public class Loader
 
         try (PrintWriter pw = new PrintWriter("res/model_" + id + ".json"))
         {
-            JSONArray json = new JSONArray();
+            JSONObject main = new JSONObject();
+
+            JSONArray weights = new JSONArray();
             for (int i = 1; i < nn.getLayers(); i++)
             {
                 System.out.println(i + " " + nn.getLayers() + " " + List.of(nn.getDimensions()));
                 JSONObject layer = new JSONObject();
                 appendMatrix(layer,  nn, i);
-                json.put( layer );
+                weights.put( layer );
             }
-            pw.println(json);
-        } catch ( IOException e )
+
+            main.put("layers", nn.getDimensions() );
+            main.put("activations", Arrays.stream(nn.getActivationFuncs())
+                .map( (act) -> act.getFunc().name )
+                .collect( Collectors.toList() )
+            );
+            main.put("weights", weights);
+
+            pw.println(main);
+        } catch ( IOException | JSONException e )
         {
             e.printStackTrace();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
         }
     }
 
+    public NeuralNetwork importModel( String filename )
+    {
+        JSONParser parser = new JSONParser();
+
+        try (FileReader reader = new FileReader("res/" + filename ) )
+        {
+            JSONObject main = (JSONObject) parser.parse(reader);
+            int[] dimensions = (int[]) main.get("layers");
+            String[] activationsName = (String[]) main.get("activations");
+            Activations[] activations = Arrays.stream(activationsName)
+                    .map(Activations::getActivation)
+                    .toArray(Activations[]::new);
+            return new NeuralNetwork(dimensions, activations);
+        }
+        catch (IOException | ParseException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     public static void saveRecording( int carIndex, List<Record.Sample> samples )
     {

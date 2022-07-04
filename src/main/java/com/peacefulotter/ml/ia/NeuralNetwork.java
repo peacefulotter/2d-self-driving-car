@@ -1,6 +1,7 @@
 package com.peacefulotter.ml.ia;
 
 import com.peacefulotter.ml.ia.activation.ActivationFunc;
+import com.peacefulotter.ml.ia.activation.Activations;
 import com.peacefulotter.ml.ia.loss.LossFunc;
 import com.peacefulotter.ml.maths.Matrix2d;
 
@@ -16,10 +17,10 @@ public class NeuralNetwork
 
     private final int layers;
     private final int[] dimensions;
-    private final ActivationFunc[] activationFuncs;
+    private final Activations[] activationFuncs;
 
     // TODO: why from 1 to layers, rather than 0 to layers - 1
-    public NeuralNetwork( int[] dimensions, ActivationFunc[] activations )
+    public NeuralNetwork( int[] dimensions, Activations[] activations )
     {
         this.layers = dimensions.length;
         this.dimensions = dimensions;
@@ -33,7 +34,7 @@ public class NeuralNetwork
         {
             this.w.put(i, Matrix2d.genRandom(dimensions[i - 1], dimensions[i]).div((float)Math.sqrt(dimensions[i-1])));
             this.b.put(i, Matrix2d.genRandom(1, dimensions[i]));
-            this.activations.put(i + 1, activations[i - 1] );
+            this.activations.put(i + 1, activations[i - 1].getFunc() );
         }
     }
 
@@ -211,6 +212,9 @@ public class NeuralNetwork
 
     public int[] getDimensions() {
         return dimensions;
+    }
+    public Activations[] getActivationFuncs() {
+        return this.activationFuncs;
     }
 
 }
