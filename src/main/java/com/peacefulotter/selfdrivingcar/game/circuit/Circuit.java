@@ -80,10 +80,10 @@ public class Circuit
 
     public void saveRecordedParents()
     {
-        System.out.println("SAVE RECORDED");
+        System.out.println("SAVE RECORDED " + cars.size() );
         for ( int i = 0; i < cars.size(); i++ )
         {
-            Loader.saveRecording(  i, ((RecordCar)cars.get( i )).getRecording() );
+            Loader.saveRecording(  i, ((RecordCar) cars.get( i )).getRecording() );
         }
     }
 

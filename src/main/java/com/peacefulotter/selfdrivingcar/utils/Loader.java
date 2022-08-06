@@ -11,10 +11,11 @@ import javafx.scene.paint.Color;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -129,17 +130,19 @@ public class Loader
         JSONArray bMatrix = new JSONArray();
         Matrix2d w = nn.getW(i);
         Matrix2d b = nn.getB(i);
-        System.out.println(w);
-        System.out.println(b);
-        for (int j = 0; j < w.cols; j++)
+
+        for (int j = 0; j < w.rows; j++)
         {
             JSONArray tempW = new JSONArray();
-            for (int k = 0; k < w.rows; k++) {
-                tempW.put( w.getAt(k, j) );
+            for (int k = 0; k < w.cols; k++) {
+                tempW.put( w.getAt(j, k) );
             }
             wMatrix.put( tempW );
+        }
+        for (int j = 0; j < w.cols; j++) {
             bMatrix.put( b.getAt(0, j ) );
         }
+
         layer.put( "w", wMatrix );
         layer.put( "b", bMatrix );
     }
@@ -152,13 +155,13 @@ public class Loader
         {
             JSONObject main = new JSONObject();
 
-            JSONArray weights = new JSONArray();
+            JSONArray neurons = new JSONArray();
             for (int i = 1; i < nn.getLayers(); i++)
             {
-                System.out.println(i + " " + nn.getLayers() + " " + List.of(nn.getDimensions()));
+                System.out.println(i + " " + nn.getLayers() + " " + Arrays.asList(nn.getDimensions()));
                 JSONObject layer = new JSONObject();
                 appendMatrix(layer,  nn, i);
-                weights.put( layer );
+                neurons.put( layer );
             }
 
             main.put("layers", nn.getDimensions() );
@@ -166,7 +169,7 @@ public class Loader
                 .map( (act) -> act.getFunc().name )
                 .collect( Collectors.toList() )
             );
-            main.put("weights", weights);
+            main.put("neurons", neurons);
 
             pw.println(main);
         } catch ( IOException | JSONException e )
@@ -177,19 +180,39 @@ public class Loader
 
     public NeuralNetwork importModel( String filename )
     {
-        JSONParser parser = new JSONParser();
-
-        try (FileReader reader = new FileReader("res/" + filename ) )
+        try
         {
-            JSONObject main = (JSONObject) parser.parse(reader);
-            int[] dimensions = (int[]) main.get("layers");
-            String[] activationsName = (String[]) main.get("activations");
-            Activations[] activations = Arrays.stream(activationsName)
+            Path path = Paths.get("res/" + filename);
+            String text = new String(Files.readAllBytes(path));
+            JSONObject main = new JSONObject(text);
+
+            JSONArray layers = (JSONArray) main.get("layers");
+            JSONArray activationsName = (JSONArray) main.get("activations");
+            JSONArray neurons = (JSONArray) main.get("neurons");
+
+            int[] dimensions = Json.toIntArray(layers);
+            Activations[] activations = Arrays.stream(Json.toStringArray(activationsName))
                     .map(Activations::getActivation)
                     .toArray(Activations[]::new);
-            return new NeuralNetwork(dimensions, activations);
+
+            NeuralNetwork network = new NeuralNetwork(dimensions, activations);
+
+            for (int i = 1; i < layers.length(); i++ )
+            {
+                JSONObject layer = (JSONObject) neurons.get(i - 1);
+                JSONArray weights = (JSONArray) layer.get("w");
+                JSONArray biases = (JSONArray) layer.get("b");
+
+                Matrix2d w = Json.toMatrix(weights, dimensions[i - 1], dimensions[i]);
+                Matrix2d b = new Matrix2d(1, dimensions[i]);
+                b.setRow(0, Json.toDoubleArray(biases) );
+
+                network.setW(i, w);
+                network.setB(i, b);
+            }
+            return network;
         }
-        catch (IOException | ParseException | JSONException e) {
+        catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 

@@ -87,6 +87,7 @@ public class NeuralNetwork
         return param;
     }
 
+    // FIXME: only one (or two) layer?
     public HashMap<Integer, HashMap<String, Matrix2d>> back_prop( LossFunc loss, HashMap<Integer, Matrix2d> z, HashMap<Integer, Matrix2d> a, Matrix2d y) {
         Matrix2d pred = a.get( layers );
         Matrix2d delta = loss.gradient(pred, y).mul(activations.get(layers).gradient(pred));

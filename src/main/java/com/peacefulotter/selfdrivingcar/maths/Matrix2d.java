@@ -56,7 +56,7 @@ public class Matrix2d
     }
 
 
-    public static Matrix2d genRandom( int rows, int cols) {
+    public static Matrix2d genRandom( int rows, int cols ) {
         Random r = new Random();
         return Matrix2d.applyFunc( (mat, i, j) -> r.nextGaussian(), rows, cols);
     }
@@ -197,6 +197,13 @@ public class Matrix2d
     public double getAt(int i, int j)
     {
         return m[i][j];
+    }
+
+    public void setRow(int i, double[] row)
+    {
+        for (int j = 0; j < cols; j++) {
+            setAt(i, j, row[j]);
+        }
     }
 
     public void setAt(int i, int j, double val)

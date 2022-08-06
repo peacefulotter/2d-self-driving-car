@@ -1,5 +1,5 @@
 - [X?] average speed is wrong in multi threading
 - Implement the test map to see if the neural networks actually learn
-- save the selected parents NN into files
+- [X] save the selected parents NN into files
 
 - CIRCUIT REFACTOR -> ABSTRACT CLASS
