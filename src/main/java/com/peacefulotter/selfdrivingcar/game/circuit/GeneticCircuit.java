@@ -5,6 +5,7 @@ import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.game.map.Map;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.ui.BottomPanel;
+import com.peacefulotter.selfdrivingcar.ui.GenerationPanel;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
 import javafx.beans.property.DoubleProperty;
@@ -73,7 +74,7 @@ public class GeneticCircuit extends Circuit
         deadCars = 0;
         selectedParents.setValue( 0 );
         averageSpeed.setValue( 0 );
-        BottomPanel.setGen( generation );
+        GenerationPanel.setGen( generation );
     }
 
     // the selected cars become the parents for the next generation

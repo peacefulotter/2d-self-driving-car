@@ -8,5 +8,6 @@
 - [X] Circuit -> remove population attribute
 - /!!!\ [NN IACar] replace acceleration with deltaArrows
 - /!!\ Import model -> dimensions define nb of arrows
+- Arrow length flickers on hitbox edges
 
 - Crossover cars are either bad or too similar to parents

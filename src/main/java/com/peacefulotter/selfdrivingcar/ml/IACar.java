@@ -15,14 +15,14 @@ import java.util.function.Function;
 public class IACar extends Car
 {
     // Neural Network specifications (hyperparameters)
-    //                                      7 = ARROWS + 2
+    //                                      x = ARROWS + 2
     //                                             2 = ACC & TURN
     public static final int[] DIMENSIONS = {11, 20, 2};
     private static final Activations[] ACTIVATIONS = {
             Activations.ReLU, Activations.HyperTan
     };
-    private static final int ARROWS = 7;
-    private static final boolean DRAW_ARROWS = false;
+    private static final int ARROWS = 9;
+    private static final boolean DRAW_ARROWS = true;
 
     private NeuralNetwork nn;
     private boolean isParent, isCrossed;

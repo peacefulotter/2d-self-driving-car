@@ -1,65 +1,64 @@
 package com.peacefulotter.selfdrivingcar.ui;
 
 import com.peacefulotter.selfdrivingcar.ml.genetic.GeneticParams;
+import com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultGenetic;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.Function;
-import java.util.function.IntConsumer;
 
 public class Spinners extends GridPane
 {
-    private static final int ORIGINAL_POP = 500;
-    private static final int MIN_POP = 200;
-    private static final int MAX_POP = 5000;
-    private static final int POP_MARGIN = 25;
+    private record SpinnerParams<T>(T min, T max, T origin, T margin) {}
 
-    private static final double CROSSOVER_RATE = 0.1d;
-    private static final double MUTATION_STRENGTH = 2d;
-    private static final double MUTATION_RATE = 0.030d;
+    private static final GeneticParams params = DefaultGenetic.GENETIC.getParams();
 
-    private GeneticParams params;
+    private static final SpinnerParams<Integer> POPULATION_PARAMS = new SpinnerParams<>(25, 5000, params.population, 25);
+    private static final SpinnerParams<Double> CROSS_RATE_PARAMS = new SpinnerParams<>(0.01d, 1d, params.crossoverRate, 0.01d );
+    private static final SpinnerParams<Double> MUT_STRENGTH_PARAMS = new SpinnerParams<>(0.01d, 5d, params.mutationStrength, 0.1d );
+    private static final SpinnerParams<Double> MUT_RATE_PARAMS = new SpinnerParams<>(0.001d, 0.1d, params.mutationRate, 0.001d );
+
+    private int i = 0; // keeps track on which row to put each spinner
 
     public Spinners()
     {
-        setStyle( "-fx-padding: 10px;" );
-
-        params = new GeneticParams( ORIGINAL_POP, CROSSOVER_RATE, MUTATION_STRENGTH, MUTATION_RATE );
-
-        addIntSpinner("Population", MIN_POP, MAX_POP, ORIGINAL_POP, POP_MARGIN, params::setPopulation, 0 );
-        addDoubleSpinner("Crossover rate" , 0.01d, 1d, CROSSOVER_RATE, 0.01d, params::setCrossoverRate, 1 );
-        addDoubleSpinner( "Mutation Strength", 0.1d, 5d, MUTATION_STRENGTH, 0.1d, params::setMutationStrength, 2);
-        addDoubleSpinner("Mutation rate", 0.001d, 0.100d, MUTATION_RATE, 0.001d, params::setMutationRate, 3);
+        setVgap(10);
+        addIntSpinner("Population", POPULATION_PARAMS, params::setPopulation );
+        addDoubleSpinner("Crossover rate", CROSS_RATE_PARAMS, params::setCrossoverRate );
+        addDoubleSpinner( "Mutation Strength", MUT_STRENGTH_PARAMS, params::setMutationStrength );
+        addDoubleSpinner("Mutation rate", MUT_RATE_PARAMS, params::setMutationRate );
     }
 
 
-    private <T extends Number> void addSpinner( String text, Spinner<T> spinner, Consumer<T> func, int i )
+    private <T extends Number> void addSpinner( String text, Spinner<T> spinner, Consumer<T> func )
     {
         Label label = new Label( text );
-        label.setStyle( "-fx-padding: 10px;" );
+        label.setPadding( new Insets(5, 10, 0, 0 ) );
 
         spinner.valueProperty().addListener( (e, o, n) -> func.accept(n) );
+        spinner.setPrefWidth( 100 );
 
-        ColumnConstraints column = new ColumnConstraints();
-        getColumnConstraints().add(column);
-        addRow( i, label, spinner );
+        BorderPane pane = new BorderPane();
+        pane.setLeft( label );
+        pane.setRight( spinner );
+        addRow( i++, pane );
     }
 
-    private void addIntSpinner(String text, int min, int max, int def, int margin, Consumer<Integer> func, int i)
+    private void addIntSpinner(String text, SpinnerParams<Integer> params, Consumer<Integer> func )
     {
-        Spinner<Integer> spinner = new Spinner<>( min, max, def, margin);
-        addSpinner( text, spinner, func, i );
+        Spinner<Integer> spinner = new Spinner<>( params.min, params.max, params.origin, params.margin );
+        addSpinner( text, spinner, func );
     }
 
-    private void addDoubleSpinner(String text, double min, double max, double def, double margin, Consumer<Double> func, int i )
+    private void addDoubleSpinner(String text, SpinnerParams<Double> params, Consumer<Double> func )
     {
-        Spinner<Double> spinner = new Spinner<>( min, max, def, margin);
-        addSpinner( text, spinner, func, i );
+        Spinner<Double> spinner = new Spinner<>( params.min, params.max, params.origin, params.margin );
+        addSpinner( text, spinner, func );
     }
 
     public GeneticParams getParams() { return params; }

@@ -11,7 +11,7 @@ import static com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultStage.C
 
 public class Menu extends GridPane
 {
-    private final BorderPane wrapper = new BorderPane();
+    private final GridPane wrapper = new GridPane();
 
     public Menu( Map map, GeneticCircuit circuit, Spinners spinners )
     {
@@ -20,12 +20,15 @@ public class Menu extends GridPane
         ColumnConstraints uiCol = new ColumnConstraints();
         getColumnConstraints().addAll(mapCol, uiCol);
 
-        BottomPanel bottomPanel = new BottomPanel( circuit, map );
-        RightPanel rightPanel = new RightPanel( circuit );
+        GenerationPanel genPanel = new GenerationPanel( circuit );
+        GridPane bottomPanel = new BottomPanel( circuit, map );
 
-        wrapper.setTop(spinners);
-        wrapper.setCenter( rightPanel );
-        wrapper.setBottom( bottomPanel );
+        wrapper.setStyle( "-fx-padding: 20px;" );
+        wrapper.setVgap(10);
+
+        wrapper.addRow( 0, spinners );
+        wrapper.addRow( 1, genPanel );
+        wrapper.addRow( 2, bottomPanel );
 
         addRow( 0, map, wrapper );
     }
