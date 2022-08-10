@@ -16,7 +16,7 @@ public class RecordCar extends IACar
     }
 
     @Override
-    public void update( float deltaTime )
+    public void update(double deltaTime )
     {
         super.update( deltaTime );
         if ( Math.random() < RECORD_PROBABILITY )

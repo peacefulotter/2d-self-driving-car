@@ -47,7 +47,7 @@ public class GameLoop extends AnimationTimer
         {
             unprocessedTime -= FRAME_TIME;
             render = true;
-            circuit.update( (float) FRAME_TIME );
+            circuit.update( FRAME_TIME );
 
             if (framesCounter >= Time.SECOND)
             {

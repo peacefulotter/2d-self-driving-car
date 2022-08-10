@@ -14,16 +14,18 @@ import java.util.function.Function;
 
 public class IACar extends Car
 {
-    // Neural Network specifications (hyper parameters)
-    public static final int[] DIMENSIONS = {7, 20, 2};
+    // Neural Network specifications (hyperparameters)
+    //                                      7 = ARROWS + 2
+    //                                             2 = ACC & TURN
+    public static final int[] DIMENSIONS = {11, 20, 2};
     private static final Activations[] ACTIVATIONS = {
             Activations.ReLU, Activations.HyperTan
     };
-    private static final int ARROWS = 5;
+    private static final int ARROWS = 7;
     private static final boolean DRAW_ARROWS = false;
 
     private NeuralNetwork nn;
-    private boolean isParent;
+    private boolean isParent, isCrossed;
 
     public IACar()
     {
@@ -46,14 +48,15 @@ public class IACar extends Car
     public void resetCar() {
         super.resetCar();
         isParent = false;
+        isCrossed = false;
     }
 
     @Override
-    public void update(float deltaTime)
+    public void update(double deltaTime)
     {
         super.update(deltaTime);
 
-        if ( !alive && !isParent && !selected)
+        if ( !alive && !isParent && !isCrossed && !selected)
         {
             colorEffect = CarColor.DEAD_COLOR;
             colorChanged = true;
@@ -70,6 +73,7 @@ public class IACar extends Car
 
     public IACar setCrossedParent()
     {
+        isCrossed = true;
         colorEffect = CarColor.CROSSED_PARENT;
         colorChanged = true;
         return this;

@@ -1,4 +1,4 @@
-package com.peacefulotter.selfdrivingcar.game;
+package com.peacefulotter.selfdrivingcar.game.map;
 
 
 import com.peacefulotter.selfdrivingcar.game.car.Car;
@@ -25,7 +25,7 @@ public class Map extends StackPane
 
     private boolean showDeadCars = true;
 
-    public Map( int width, int height, MapParams params )
+    public Map( int width, int height, Maps params )
     {
         this.canvas = new Canvas( width, height );
         this.ctx = canvas.getGraphicsContext2D();
@@ -45,11 +45,14 @@ public class Map extends StackPane
         canvas.requestFocus();
     }
 
-    public void setParams( MapParams params )
+    public void setParams( Maps map )
     {
-        Car.ORIGIN_POSITION = params.getDirection();
-        Car.ORIGIN_ANGLE = params.getAngle();
+        MapParams params = map.getParams();
+
+        Car.originPosition = params.getPosition();
+        Car.originAngle = params.getAngle();
         Car.hitbox = new Loader().loadHitbox( params.getHitbox(), canvas.getWidth(), canvas.getHeight() );
+
         Image img = new Image( params.getImg() );
         circuitImage.setImage( img );
     }
@@ -76,7 +79,7 @@ public class Map extends StackPane
         getChildren().remove( from + BASE_CHILDREN, to + BASE_CHILDREN );
     }
 
-    public void render(List<IACar> cars)
+    public void render( List<IACar> cars )
     {
         ctx.clearRect( 0, 0, canvas.getWidth(), canvas.getHeight() );
 

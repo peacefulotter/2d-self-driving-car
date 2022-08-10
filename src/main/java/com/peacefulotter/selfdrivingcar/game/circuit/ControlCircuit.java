@@ -1,10 +1,10 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
-import com.peacefulotter.selfdrivingcar.game.Map;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
-import com.peacefulotter.selfdrivingcar.utils.Input;
+import com.peacefulotter.selfdrivingcar.utils.CarInput;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 
 import java.util.ArrayList;
@@ -18,46 +18,45 @@ public class ControlCircuit extends Circuit
     private static final List<Matrix2d> positions = new ArrayList<>();
     private static final List<Vector2d> controls = new ArrayList<>();
 
-    private static final IACar car = new IACar( 5, true );
-
+    private static final IACar car = new IACar( 9, true );
 
     public ControlCircuit( Map map )
     {
-        super( map, null );
+        super( map );
 
-        map.addCarToMap( car );
-        map.setOnKeyPressed( keyEvent -> Input.handleKeyPressed( car, keyEvent ) );
-        map.setOnKeyReleased( keyEvent -> Input.handleKeyReleased( car, keyEvent ) );
+        addCarToCircuit( car );
+        map.setOnKeyPressed( keyEvent -> CarInput.handleKeyPressed( car, keyEvent ) );
+        map.setOnKeyReleased( keyEvent -> CarInput.handleKeyReleased( car, keyEvent ) );
     }
 
     @Override
-    protected void update( float deltaTime, int from, int to )
+    public void update( double deltaTime )
     {
+        // update all cars except the first one which is the controlled car
+        super.update( deltaTime, 1, cars.size() );
+
         Matrix2d x = car.simulate();
-        Vector2d y = Input.getVector();
+        Vector2d y = CarInput.getVector();
 
         car.accelerate( y.getX() );
         car.turn( y.getY() );
         car.update( deltaTime );
 
         if ( SAVING )
-        {
-            positions.add( x );
-            controls.add( y.copy() );
-
-            if ( positions.size() > SAVE_THRESHOLD )
-            {
-                Loader.saveDrivingData( positions, controls );
-                System.out.println("SAVED");
-                positions.clear();
-                controls.clear();
-            }
-        }
+            saveCarState(x, y);
     }
 
-    @Override
-    public void render()
+    private void saveCarState( Matrix2d x, Vector2d y )
     {
-        map.render( List.of( car ) );
+        positions.add( x );
+        controls.add( y.copy() );
+
+        if ( positions.size() > SAVE_THRESHOLD )
+        {
+            Loader.saveDrivingData( positions, controls );
+            System.out.println("SAVED");
+            positions.clear();
+            controls.clear();
+        }
     }
 }

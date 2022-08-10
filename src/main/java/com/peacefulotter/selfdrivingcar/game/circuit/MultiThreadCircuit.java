@@ -1,21 +1,18 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
-import com.peacefulotter.selfdrivingcar.game.Map;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
 import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
-import com.peacefulotter.selfdrivingcar.ml.genetic.GeneticParams;
-import com.peacefulotter.selfdrivingcar.ui.Spinners;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiThreadCircuit extends Circuit
+public class MultiThreadCircuit extends GeneticCircuit
 {
     private static final int THREAD_REDUCE = 2;
     public static final int THREADS = Runtime.getRuntime().availableProcessors() - THREAD_REDUCE; // nb of threads
 
     private final List<ThreadedCircuit> threadedCircuits;
 
-    private boolean isRecording;
     private boolean isTesting;
 
     public MultiThreadCircuit( Map map, Genetic genetic )
@@ -24,6 +21,7 @@ public class MultiThreadCircuit extends Circuit
 
         this.threadedCircuits = new ArrayList<>();
 
+        int population = genetic.getPopulation();
         int padding = population / THREADS;
         int startPop = 0;
         int endPop = padding;
@@ -65,13 +63,9 @@ public class MultiThreadCircuit extends Circuit
     }
 
     @Override
-    public void update( float deltaTime )
+    public void update( double deltaTime )
     {
-        if ( isRecording )
-        {
-            super.update( deltaTime );
-        }
-        else if ( isTesting )
+        if ( isTesting )
         {
             threadedCircuits.get(0).update(deltaTime);
         }
@@ -84,7 +78,7 @@ public class MultiThreadCircuit extends Circuit
     @Override
     public void nextGeneration()
     {
-        int oldPopulation = population;
+        int oldPopulation = cars.size();
         super.nextGeneration();
 
         int newPopulation = genetic.getPopulation();
@@ -97,19 +91,5 @@ public class MultiThreadCircuit extends Circuit
         super.testGeneration();
         threadedCircuits.get(0).updatePopulation(0, cars.size());
         isTesting = true;
-    }
-
-    @Override
-    public void recordParentGeneration()
-    {
-        super.recordParentGeneration();
-        isRecording = true;
-    }
-
-    @Override
-    public void saveRecordedParents()
-    {
-        super.saveRecordedParents();
-        isRecording = false;
     }
 }

@@ -1,14 +1,18 @@
 package com.peacefulotter.selfdrivingcar.scenarios;
 
-import com.peacefulotter.selfdrivingcar.game.*;
-import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
+import com.peacefulotter.selfdrivingcar.game.circuit.GeneticCircuit;
 import com.peacefulotter.selfdrivingcar.game.circuit.MultiThreadCircuit;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
+import com.peacefulotter.selfdrivingcar.game.map.Maps;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
 import com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultGenetic;
 import com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultStage;
+import com.peacefulotter.selfdrivingcar.ui.Menu;
+import com.peacefulotter.selfdrivingcar.ui.Spinners;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 import javafx.application.Application;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
@@ -26,12 +30,14 @@ public class ModelParent extends Application
                 .map(IACar::new)
                 .toList();
 
-        Map map = DefaultStage.createMap();
+        Map map = DefaultStage.createMap(Maps.TEST);
         Genetic genetic = DefaultGenetic.GENETIC;
-        Circuit circuit = new MultiThreadCircuit( map, genetic );
+        GeneticCircuit circuit = new MultiThreadCircuit( map, genetic );
 
         circuit.nextGeneration( trainedNNs );
 
-        DefaultStage.launch(stage, map, circuit);
+        GridPane root = new Menu( map, circuit, new Spinners() );
+
+        DefaultStage.launch(stage, root, circuit);
     }
 }

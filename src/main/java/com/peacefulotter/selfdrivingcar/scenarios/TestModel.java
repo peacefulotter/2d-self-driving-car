@@ -1,7 +1,7 @@
 package com.peacefulotter.selfdrivingcar.scenarios;
 
-import com.peacefulotter.selfdrivingcar.game.Map;
-import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
+import com.peacefulotter.selfdrivingcar.game.circuit.GeneticCircuit;
 import com.peacefulotter.selfdrivingcar.game.circuit.MultiThreadCircuit;
 import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
 import com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultGenetic;
@@ -19,7 +19,7 @@ public class TestModel extends Application {
         NeuralNetwork network = loader.importModel("model_5224.json");
 
         Map map = DefaultStage.createMap();
-        Circuit circuit = new MultiThreadCircuit(map, DefaultGenetic.GENETIC );
+        GeneticCircuit circuit = new MultiThreadCircuit(map, DefaultGenetic.GENETIC );
         DefaultStage.launch( stage, map, circuit );
     }
 }

@@ -6,7 +6,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 
-public abstract class Input
+public abstract class CarInput
 {
     private static final Vector2d vector = new Vector2d( 0, 0 );
 
@@ -16,19 +16,19 @@ public abstract class Input
         keyEvent.consume(); // stops the event propagation.
 
         switch (key) {
-            case UP -> {
+            case Z -> {
                 car.accelerate(1);
                 vector.setX(1);
             }
-            case RIGHT -> {
+            case D -> {
                 car.turn(1);
                 vector.setY(1);
             }
-            case DOWN -> {
+            case S -> {
                 car.accelerate(-1);
                 vector.setX(-1);
             }
-            case LEFT -> {
+            case Q -> {
                 car.turn(-1);
                 vector.setY(-1);
             }
@@ -43,11 +43,11 @@ public abstract class Input
         keyEvent.consume(); // stops the event propagation.
 
         switch (key) {
-            case UP, DOWN -> {
+            case Z, S -> {
                 car.accelerate(0);
                 vector.setX(0);
             }
-            case RIGHT, LEFT -> {
+            case D, Q -> {
                 car.turn(0);
                 vector.setY(0);
             }

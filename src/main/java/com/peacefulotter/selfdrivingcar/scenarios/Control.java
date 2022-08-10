@@ -1,6 +1,6 @@
 package com.peacefulotter.selfdrivingcar.scenarios;
 
-import com.peacefulotter.selfdrivingcar.game.Map;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
 import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
 import com.peacefulotter.selfdrivingcar.game.circuit.ControlCircuit;
 import com.peacefulotter.selfdrivingcar.scenarios.defaults.DefaultStage;

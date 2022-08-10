@@ -30,7 +30,9 @@ public class Arrows
 
     public List<Double> getLengths()
     {
-        return this.arrows.stream().map(Arrow::getLength).collect(Collectors.toList());
+        return this.arrows.stream()
+                .map(Arrow::getLength)
+                .toList();
     }
 
     void update( Vector2d pos, double angle )

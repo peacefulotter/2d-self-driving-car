@@ -1,6 +1,7 @@
 package com.peacefulotter.selfdrivingcar.game.car;
 
-import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
+import com.peacefulotter.selfdrivingcar.game.circuit.GeneticCircuit;
+import com.peacefulotter.selfdrivingcar.game.map.MapParams;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
 import javafx.scene.CacheHint;
@@ -28,8 +29,8 @@ public class Car
     private static final double DEAD_OPACITY = 0.3;
 
     public static Matrix2d hitbox;
-    public static Vector2d ORIGIN_POSITION;
-    public static double ORIGIN_ANGLE;
+    public static Vector2d originPosition;
+    public static double originAngle;
 
     private final ImageView car;
     protected final Arrows arrows;
@@ -51,7 +52,7 @@ public class Car
 
     private Vector2d getOriginDirection()
     {
-        return new Vector2d( 1, 0 ).rotate( ORIGIN_ANGLE );
+        return new Vector2d( 1, 0 ).rotate( Car.originAngle );
     }
 
     /**
@@ -72,8 +73,8 @@ public class Car
     {
         partialReset();
 
-        angle = ORIGIN_ANGLE;
-        position = ORIGIN_POSITION;
+        angle = originAngle;
+        position = originPosition;
         direction = getOriginDirection();
         alive = true;
         selected = false;
@@ -146,9 +147,10 @@ public class Car
         angleSpeed = angle * TURN_DEGREE;
     }
 
-    public void update( float deltaTime )
+    public void update( double deltaTime )
     {
         if ( !alive ) return;
+
         double newSpeed = speed + ( acceleration - SLOWNESS ) * deltaTime * SPEED_EASE;
         if ( newSpeed <= MAX_SPEED && newSpeed >= 0 )
             speed = newSpeed;
@@ -165,7 +167,6 @@ public class Car
         this.arrows.update( position, angle );
 
         alive = checkHitbox();
-
         if ( !alive )
             car.setOpacity( DEAD_OPACITY );
     }
@@ -196,7 +197,7 @@ public class Car
         img.setCacheHint( CacheHint.SPEED );
         img.setOnMouseClicked( ( event ) -> {
             selected = !selected;
-            Circuit.addSelected(selected ? 1 : -1);
+            GeneticCircuit.addSelected(selected ? 1 : -1);
             colorEffect = selected
                     ? CarColor.SELECTED_COLOR
                     :  alive

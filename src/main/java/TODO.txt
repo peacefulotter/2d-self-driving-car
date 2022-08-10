@@ -1,9 +1,12 @@
 - [X???] average speed is wrong in multi threading
-- Implement the test map to see if the neural networks actually learn
+- [X] Implement the test map to see if the neural networks actually learn
 - [X] save the selected parents NN into files
-- Auto select best cars (fit best racetrack -> how to get)
+- /!\ Auto select best cars (fit best racetrack -> how to get)
 - benchmark render car and multithread it if need be
-- CIRCUIT REFACTOR -> ABSTRACT CLASS
-- abstraction of spinners -> not passed to circuit constructor
+- [X] CIRCUIT REFACTOR -> MORE ABSTRACT CLASS
+- [X] abstraction of spinners -> not passed to circuit constructor
+- [X] Circuit -> remove population attribute
+- /!!!\ [NN IACar] replace acceleration with deltaArrows
+- /!!\ Import model -> dimensions define nb of arrows
 
 - Crossover cars are either bad or too similar to parents

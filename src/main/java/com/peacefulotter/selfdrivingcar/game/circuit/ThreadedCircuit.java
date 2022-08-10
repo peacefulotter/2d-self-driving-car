@@ -5,13 +5,13 @@ package com.peacefulotter.selfdrivingcar.game.circuit;
  */
 public class ThreadedCircuit extends Thread
 {
-    private final Circuit circuit;
+    private final GeneticCircuit circuit;
 
     private volatile boolean requestUpdate = false;
-    private volatile float deltaTime;
+    private volatile double deltaTime;
     private int startPop, endPop;
 
-    public ThreadedCircuit( Circuit circuit, int startPop, int endPop )
+    public ThreadedCircuit(GeneticCircuit circuit, int startPop, int endPop )
     {
         super();
         this.circuit = circuit;
@@ -32,7 +32,9 @@ public class ThreadedCircuit extends Thread
         while ( true )
         {
             triggerAction();
+
             if (Thread.interrupted()) { return; }
+
             try { sleep( 1 ); }
             catch ( InterruptedException e ) { e.printStackTrace(); }
         }
@@ -47,7 +49,7 @@ public class ThreadedCircuit extends Thread
         }
     }
 
-    public void update( float deltaTime )
+    public void update( double deltaTime )
     {
         this.deltaTime = deltaTime;
         requestUpdate = true;

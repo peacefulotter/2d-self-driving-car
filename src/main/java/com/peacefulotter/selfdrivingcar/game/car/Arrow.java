@@ -45,7 +45,7 @@ public class Arrow
     {
         this.origin = origin.copy();
         this.direction = new Vector2d( 1, 0 ).rotate( angle + innerAngle );
-        getWallPoint( 1, 20 );
+        getWallPoint( 1, 10 );
     }
 
     public void draw( GraphicsContext ctx )

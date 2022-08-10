@@ -1,8 +1,7 @@
 package com.peacefulotter.selfdrivingcar.ui;
 
-import com.peacefulotter.selfdrivingcar.game.Map;
-import com.peacefulotter.selfdrivingcar.game.MapParams;
-import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
+import com.peacefulotter.selfdrivingcar.game.map.Map;
+import com.peacefulotter.selfdrivingcar.game.circuit.GeneticCircuit;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -19,14 +18,9 @@ public class BottomPanel extends BorderPane
     private static final Label genLabel = new Label( "Generation 1" );
     private static final Label popProportionLabel = new Label(  0 + " / " + 0 );
 
-    public BottomPanel( Circuit circuit, Map map )
+    public BottomPanel(GeneticCircuit circuit, Map map )
     {
         // setStyle( "-fx-spacing: 4; -fx-padding: 4;" );
-        // RECORD BUTTON
-        Button recordBtn = new Button("Record parents");
-        Button saveRecordedBtn = new Button( "Save Recorded parent");
-        recordBtn.setOnMouseClicked( event -> circuit.recordParentGeneration() );
-        saveRecordedBtn.setOnMouseClicked( event -> circuit.saveRecordedParents() );
 
         Button toggleRenderDeadCarButton = new Button( "Toggle render dead car" );
         Button testMapButton = new Button( "Test Map" );
@@ -58,7 +52,6 @@ public class BottomPanel extends BorderPane
         VBox bottom = new VBox();
         bottom.setAlignment(Pos.CENTER_LEFT);
         bottom.getChildren().addAll(
-            recordBtn, saveRecordedBtn,
             toggleRenderDeadCarButton, genLabel,
             selectedParentsLabel, popProportionLabel,
             fpsLabel, averageSpeed, testMapButton, saveModelButton
