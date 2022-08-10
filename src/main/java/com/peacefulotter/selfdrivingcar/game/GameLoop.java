@@ -1,19 +1,21 @@
 package com.peacefulotter.selfdrivingcar.game;
 
 import com.peacefulotter.selfdrivingcar.game.circuit.Circuit;
-import com.peacefulotter.selfdrivingcar.ui.BottomPanel;
 import com.peacefulotter.selfdrivingcar.utils.Time;
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 public class GameLoop extends AnimationTimer
 {
     private static final double FRAMES_CAP = 240;
     private static final double FRAME_TIME = 1.0 / FRAMES_CAP;
+    public static final IntegerProperty frames = new SimpleIntegerProperty(0);
 
     private final Circuit circuit;
 
-    private int frames;
     private double framesCounter, lastTime, unprocessedTime;
+    private int _frames = 0;
 
     public GameLoop( Circuit circuit )
     {
@@ -23,7 +25,6 @@ public class GameLoop extends AnimationTimer
     @Override
     public void start()
     {
-        frames = 0;
         framesCounter = 0;
         lastTime = Time.getNanoTime();
         unprocessedTime = 0; // time in seconds since the start
@@ -42,7 +43,6 @@ public class GameLoop extends AnimationTimer
         unprocessedTime += passedTime / Time.SECOND;
         framesCounter += passedTime;
 
-
         while ( unprocessedTime > FRAME_TIME )
         {
             unprocessedTime -= FRAME_TIME;
@@ -51,16 +51,16 @@ public class GameLoop extends AnimationTimer
 
             if (framesCounter >= Time.SECOND)
             {
-                BottomPanel.setFPS(frames);
-                frames = 0;
+                frames.setValue( _frames );
                 framesCounter = 0;
+                _frames = 0;
             }
         }
 
         if ( render )
         {
             circuit.render();
-            frames++;
+            _frames++;
         } else
         {
             try

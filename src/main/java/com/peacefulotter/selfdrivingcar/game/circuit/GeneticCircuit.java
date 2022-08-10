@@ -8,10 +8,7 @@ import com.peacefulotter.selfdrivingcar.ui.BottomPanel;
 import com.peacefulotter.selfdrivingcar.ui.GenerationPanel;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +19,7 @@ public class GeneticCircuit extends Circuit
 
     private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
     private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
+    private static final StringProperty popProportion = new SimpleStringProperty("0 / 0" );
 
     protected final Genetic genetic;
 
@@ -107,8 +105,8 @@ public class GeneticCircuit extends Circuit
     {
         super.render();
         int population = cars.size();
-        averageSpeed.setValue( speed / (float) population );
-        BottomPanel.setPopProportion( population - deadCars, deadCars );
+        averageSpeed.setValue( speed / (double) population );
+        popProportion.setValue( population - deadCars + " / " + deadCars );
         speed = 0;
     }
 
@@ -136,4 +134,5 @@ public class GeneticCircuit extends Circuit
     public int getGeneration() { return generation; }
     public DoubleProperty getAverageSpeed() { return averageSpeed; }
     public IntegerProperty getSelectedParents() { return selectedParents; }
+    public StringProperty getPopProportion() { return popProportion; }
 }
