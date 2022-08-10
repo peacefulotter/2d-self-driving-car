@@ -1,7 +1,7 @@
 package com.peacefulotter.selfdrivingcar.utils;
 
 import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
-import com.peacefulotter.selfdrivingcar.ml.Record;
+import com.peacefulotter.selfdrivingcar.game.car.Record;
 import com.peacefulotter.selfdrivingcar.ml.activation.Activations;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
@@ -155,21 +155,20 @@ public class Loader
         {
             JSONObject main = new JSONObject();
 
-            JSONArray neurons = new JSONArray();
+            JSONArray layers = new JSONArray();
             for (int i = 1; i < nn.getLayers(); i++)
             {
-                System.out.println(i + " " + nn.getLayers() + " " + Arrays.asList(nn.getDimensions()));
                 JSONObject layer = new JSONObject();
                 appendMatrix(layer,  nn, i);
-                neurons.put( layer );
+                layers.put( layer );
             }
 
-            main.put("layers", nn.getDimensions() );
+            main.put("dimensions", nn.getDimensions() );
             main.put("activations", Arrays.stream(nn.getActivationFuncs())
                 .map( (act) -> act.getFunc().name )
                 .collect( Collectors.toList() )
             );
-            main.put("neurons", neurons);
+            main.put("layers", layers);
 
             pw.println(main);
         } catch ( IOException | JSONException e )
@@ -186,25 +185,25 @@ public class Loader
             String text = new String(Files.readAllBytes(path));
             JSONObject main = new JSONObject(text);
 
-            JSONArray layers = (JSONArray) main.get("layers");
+            JSONArray dimensions = (JSONArray) main.get("dimensions");
             JSONArray activationsName = (JSONArray) main.get("activations");
-            JSONArray neurons = (JSONArray) main.get("neurons");
+            JSONArray layers = (JSONArray) main.get("layers");
 
-            int[] dimensions = Json.toIntArray(layers);
+            int[] dimensionsArray = Json.toIntArray(dimensions);
             Activations[] activations = Arrays.stream(Json.toStringArray(activationsName))
                     .map(Activations::getActivation)
                     .toArray(Activations[]::new);
 
-            NeuralNetwork network = new NeuralNetwork(dimensions, activations);
+            NeuralNetwork network = new NeuralNetwork(dimensionsArray, activations);
 
-            for (int i = 1; i < layers.length(); i++ )
+            for (int i = 1; i < dimensions.length(); i++ )
             {
-                JSONObject layer = (JSONObject) neurons.get(i - 1);
+                JSONObject layer = (JSONObject) layers.get(i - 1);
                 JSONArray weights = (JSONArray) layer.get("w");
                 JSONArray biases = (JSONArray) layer.get("b");
 
-                Matrix2d w = Json.toMatrix(weights, dimensions[i - 1], dimensions[i]);
-                Matrix2d b = new Matrix2d(1, dimensions[i]);
+                Matrix2d w = Json.toMatrix(weights, dimensionsArray[i - 1], dimensionsArray[i]);
+                Matrix2d b = new Matrix2d(1, dimensionsArray[i]);
                 b.setRow(0, Json.toDoubleArray(biases) );
 
                 network.setW(i, w);

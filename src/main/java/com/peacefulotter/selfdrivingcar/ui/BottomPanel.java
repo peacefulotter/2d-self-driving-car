@@ -38,7 +38,6 @@ public class BottomPanel extends BorderPane
         // Listeners and Bindings
         toggleRenderDeadCarButton.setOnMouseClicked( event -> map.toggleRenderDeadCars() );
         testMapButton.setOnMouseClicked( event -> {
-            map.setParams( MapParams.TEST );
             circuit.testGeneration();
         } );
         saveModelButton.setOnMouseClicked( event -> circuit.saveSelectedCar() );

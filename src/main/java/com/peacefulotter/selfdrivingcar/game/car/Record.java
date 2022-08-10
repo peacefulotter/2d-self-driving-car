@@ -1,4 +1,4 @@
-package com.peacefulotter.selfdrivingcar.ml;
+package com.peacefulotter.selfdrivingcar.game.car;
 
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
 

@@ -1,5 +1,9 @@
-- [X?] average speed is wrong in multi threading
+- [X???] average speed is wrong in multi threading
 - Implement the test map to see if the neural networks actually learn
 - [X] save the selected parents NN into files
-
+- Auto select best cars (fit best racetrack -> how to get)
+- benchmark render car and multithread it if need be
 - CIRCUIT REFACTOR -> ABSTRACT CLASS
+- abstraction of spinners -> not passed to circuit constructor
+
+- Crossover cars are either bad or too similar to parents

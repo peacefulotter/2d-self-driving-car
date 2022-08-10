@@ -1,6 +1,8 @@
-package com.peacefulotter.selfdrivingcar.ml;
+package com.peacefulotter.selfdrivingcar.ml.genetic;
 
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
+import com.peacefulotter.selfdrivingcar.ml.IACar;
+import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
 import com.peacefulotter.selfdrivingcar.ui.Spinners;
 
 import java.util.ArrayList;
@@ -10,14 +12,14 @@ import java.util.Random;
 
 public class Genetic
 {
-    private final Spinners spinners;
+    private final GeneticParams params;
 
-    public Genetic( Spinners spinners )
+    public Genetic( GeneticParams params )
     {
-        this.spinners = spinners;
+        this.params = params;
     }
 
-    private void addMutatedParent( List<IACar> cars, IACar parent )
+    private void addMutatedParent(List<IACar> cars, IACar parent )
     {
         cars.add( new IACar( mutate( parent ) ) );
     }
@@ -91,7 +93,7 @@ public class Genetic
     private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < spinners.getCrossover() )
+            if ( Math.random() < params.getCrossoverRate() )
                 return a.getAt( i, j );
             else
                 return b.getAt( i, j );
@@ -103,12 +105,11 @@ public class Genetic
         return car1.applyNNFunction( this::crossing, car2 );
     }
 
-
     private Matrix2d mutation( Matrix2d a )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < spinners.getMutRate() )
-                return a.getAt( i, j ) + spinners.getMutIntensity() * ( new Random().nextDouble() - 0.5f );
+            if ( Math.random() < params.getMutationRate() )
+                return a.getAt( i, j ) + params.getMutationStrength() * ( new Random().nextDouble() - 0.5f );
             else
                 return a.getAt( i, j );
         } );

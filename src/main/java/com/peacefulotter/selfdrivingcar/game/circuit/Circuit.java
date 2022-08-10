@@ -1,13 +1,15 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
+import com.peacefulotter.selfdrivingcar.game.MapParams;
 import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.game.Map;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
-import com.peacefulotter.selfdrivingcar.ml.RecordCar;
+import com.peacefulotter.selfdrivingcar.game.car.RecordCar;
+import com.peacefulotter.selfdrivingcar.ml.genetic.GeneticParams;
 import com.peacefulotter.selfdrivingcar.ui.BottomPanel;
 import com.peacefulotter.selfdrivingcar.ui.Spinners;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
-import com.peacefulotter.selfdrivingcar.ml.Genetic;
+import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -38,11 +40,11 @@ public class Circuit
     protected List<IACar> cars;
     protected int population;
 
-    public Circuit( Map map, Spinners spinners )
+    public Circuit( Map map, GeneticParams params )
     {
         this.map = map;
-        this.genetic = new Genetic( spinners );
-        this.population = spinners != null ? spinners.getPopulation() : 0;
+        this.genetic = new Genetic( params );
+        this.population = params != null ? params.getPopulation() : 0;
         this.cars = new ArrayList<>();
         genCars();
     }
@@ -171,7 +173,9 @@ public class Circuit
 
     public void testGeneration()
     {
+        map.setParams( MapParams.TEST );
         List<IACar> parents = getGenParents();
+        parents.forEach(IACar::resetCar);
         System.out.println("Testing on " + parents.size() + " parents");
         createGeneration( parents );
     }

@@ -1,6 +1,7 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
 import com.peacefulotter.selfdrivingcar.game.Map;
+import com.peacefulotter.selfdrivingcar.ml.genetic.GeneticParams;
 import com.peacefulotter.selfdrivingcar.ui.Spinners;
 
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ public class MultiThreadCircuit extends Circuit
     private final List<ThreadedCircuit> threadedCircuits;
 
     private boolean isRecording;
+    private boolean isTesting;
 
-    public MultiThreadCircuit(Map map, Spinners spinners )
+    public MultiThreadCircuit( Map map, GeneticParams params )
     {
-        super( map, spinners );
+        super( map, params );
 
         this.threadedCircuits = new ArrayList<>();
 
@@ -67,7 +69,12 @@ public class MultiThreadCircuit extends Circuit
         if ( isRecording )
         {
             super.update( deltaTime );
-        } else
+        }
+        else if ( isTesting )
+        {
+            threadedCircuits.get(0).update(deltaTime);
+        }
+        else
         {
             threadedCircuits.forEach( tc -> tc.update( deltaTime ) );
         }
@@ -83,6 +90,13 @@ public class MultiThreadCircuit extends Circuit
         {
             setPopulation( newPopulation );
         }
+    }
+
+    @Override
+    public void testGeneration() {
+        super.testGeneration();
+        threadedCircuits.get(0).updatePopulation(0, cars.size());
+        isTesting = true;
     }
 
     @Override
