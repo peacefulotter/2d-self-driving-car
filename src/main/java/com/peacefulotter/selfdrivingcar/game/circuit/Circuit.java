@@ -30,7 +30,7 @@ public class Circuit
     private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
     private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
 
-    private final Genetic genetic;
+    protected final Genetic genetic;
     protected final Map map;
 
     private double speed;
@@ -40,11 +40,11 @@ public class Circuit
     protected List<IACar> cars;
     protected int population;
 
-    public Circuit( Map map, GeneticParams params )
+    public Circuit( Map map, Genetic genetic )
     {
         this.map = map;
-        this.genetic = new Genetic( params );
-        this.population = params != null ? params.getPopulation() : 0;
+        this.genetic = genetic;
+        this.population = genetic != null ? genetic.getPopulation() : 0;
         this.cars = new ArrayList<>();
         genCars();
     }
@@ -91,10 +91,8 @@ public class Circuit
 
     public void update( float deltaTime ) { update( deltaTime, 0, population ); }
 
-    public void nextGeneration( int newPopulation )
+    public void nextGeneration( List<IACar> parents )
     {
-        List<IACar> parents = getGenParents();
-
         int parentsSize = parents.size();
         if ( parentsSize == 0 )
         {
@@ -107,8 +105,14 @@ public class Circuit
 
         // apply crossovers to the parents
         // and generate the new population by mutating the crossed parents
-        List<IACar> newCars = genetic.nextGeneration( parents, generation + 1, newPopulation );
+        List<IACar> newCars = genetic.nextGeneration( parents, generation + 1 );
         createGeneration( newCars );
+    }
+
+    public void nextGeneration()
+    {
+        List<IACar> parents = getGenParents();
+        nextGeneration( parents );
     }
 
     void createGeneration( List<IACar> newCars )

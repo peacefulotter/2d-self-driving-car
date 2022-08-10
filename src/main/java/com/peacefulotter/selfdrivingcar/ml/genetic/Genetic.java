@@ -3,7 +3,6 @@ package com.peacefulotter.selfdrivingcar.ml.genetic;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
-import com.peacefulotter.selfdrivingcar.ui.Spinners;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +18,21 @@ public class Genetic
         this.params = params;
     }
 
+    public Genetic( int population, double crossoverRate, double mutationStrength, double mutationRate )
+    {
+        this.params = new GeneticParams( population, crossoverRate, mutationStrength, mutationRate );
+    }
+
+    public GeneticParams getParams() { return params; }
+    public int getPopulation() { return params.population; }
+    public double getCrossoverRate() { return params.crossoverRate; }
+    public double getMutationStrength() { return params.mutationStrength; }
+    public double getMutationRate() { return params.mutationRate; }
+
     private void addMutatedParent(List<IACar> cars, IACar parent )
     {
         cars.add( new IACar( mutate( parent ) ) );
     }
-
 
     private List<IACar> getCrossoverParents( List<IACar> parents )
     {
@@ -52,14 +61,14 @@ public class Genetic
     /**
      * Crossover the parents and mutate them to obtain their children
      * @param parents: selected parents from all the cars
-     * @param newPopulation: size of the new population
      */
-    public List<IACar> nextGeneration( List<IACar> parents, int gen, int newPopulation )
+    public List<IACar> nextGeneration( List<IACar> parents, int gen )
     {
         List<IACar> cars = new ArrayList<>();
         List<IACar> fullParents = getCrossoverParents(parents);
 
         int parentSize = fullParents.size();
+        int newPopulation = params.population;
         int childrenPopulation = newPopulation - parentSize;
         int childrenPerParent = childrenPopulation / parentSize;
         System.out.println("[" + gen + "] new population: " + newPopulation + ", parent size: " + parentSize + ", children per parent: " + childrenPerParent);
@@ -93,7 +102,7 @@ public class Genetic
     private Matrix2d crossing( Matrix2d a, Matrix2d b )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < params.getCrossoverRate() )
+            if ( Math.random() < params.crossoverRate )
                 return a.getAt( i, j );
             else
                 return b.getAt( i, j );
@@ -108,8 +117,8 @@ public class Genetic
     private Matrix2d mutation( Matrix2d a )
     {
         return a.applyFunc( (mat, i, j) -> {
-            if ( Math.random() < params.getMutationRate() )
-                return a.getAt( i, j ) + params.getMutationStrength() * ( new Random().nextDouble() - 0.5f );
+            if ( Math.random() < params.mutationRate )
+                return a.getAt( i, j ) + params.mutationStrength * ( new Random().nextDouble() - 0.5f );
             else
                 return a.getAt( i, j );
         } );

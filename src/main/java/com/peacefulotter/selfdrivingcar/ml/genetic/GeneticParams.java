@@ -2,8 +2,8 @@ package com.peacefulotter.selfdrivingcar.ml.genetic;
 
 public class GeneticParams
 {
-    private int population;
-    private double crossoverRate, mutationStrength, mutationRate;
+    public int population;
+    public double crossoverRate, mutationStrength, mutationRate;
 
     public GeneticParams(int population, double crossoverRate, double mutationStrength, double mutationRate)
     {
@@ -11,22 +11,6 @@ public class GeneticParams
         this.crossoverRate = crossoverRate;
         this.mutationStrength = mutationStrength;
         this.mutationRate = mutationRate;
-    }
-
-    public int getPopulation() {
-        return population;
-    }
-
-    public double getCrossoverRate() {
-        return crossoverRate;
-    }
-
-    public double getMutationStrength() {
-        return mutationStrength;
-    }
-
-    public double getMutationRate() {
-        return mutationRate;
     }
 
     public void setPopulation(int population) {
@@ -41,7 +25,5 @@ public class GeneticParams
         this.mutationStrength = mutationStrength;
     }
 
-    public void setMutationRate(double mutationRate) {
-        this.mutationRate = mutationRate;
-    }
+    public void setMutationRate(double mutationRate) { this.mutationRate = mutationRate; }
 }

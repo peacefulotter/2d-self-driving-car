@@ -153,6 +153,7 @@ public class Loader
 
         try (PrintWriter pw = new PrintWriter("res/model_" + id + ".json"))
         {
+            System.out.println("Saving model: " + id);
             JSONObject main = new JSONObject();
 
             JSONArray layers = new JSONArray();
@@ -181,7 +182,8 @@ public class Loader
     {
         try
         {
-            Path path = Paths.get("res/" + filename);
+            System.out.println("Loading model: " + filename);
+            Path path = Paths.get("res/" + filename + ".json");
             String text = new String(Files.readAllBytes(path));
             JSONObject main = new JSONObject(text);
 

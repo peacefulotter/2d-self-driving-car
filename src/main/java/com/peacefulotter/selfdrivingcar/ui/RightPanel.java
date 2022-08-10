@@ -7,10 +7,10 @@ import javafx.scene.layout.BorderPane;
 
 public class RightPanel extends BorderPane
 {
-    public RightPanel( Circuit circuit, GeneticParams params )
+    public RightPanel( Circuit circuit )
     {
         Button nextGenButton = new Button( "Next Gen" );
-        nextGenButton.setOnMouseClicked( event -> circuit.nextGeneration( params.getPopulation() ) );
+        nextGenButton.setOnMouseClicked( event -> circuit.nextGeneration() );
 
         setBottom( nextGenButton );
     }

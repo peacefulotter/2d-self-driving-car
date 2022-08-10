@@ -1,6 +1,7 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
 import com.peacefulotter.selfdrivingcar.game.Map;
+import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
 import com.peacefulotter.selfdrivingcar.ml.genetic.GeneticParams;
 import com.peacefulotter.selfdrivingcar.ui.Spinners;
 
@@ -17,9 +18,9 @@ public class MultiThreadCircuit extends Circuit
     private boolean isRecording;
     private boolean isTesting;
 
-    public MultiThreadCircuit( Map map, GeneticParams params )
+    public MultiThreadCircuit( Map map, Genetic genetic )
     {
-        super( map, params );
+        super( map, genetic );
 
         this.threadedCircuits = new ArrayList<>();
 
@@ -81,15 +82,14 @@ public class MultiThreadCircuit extends Circuit
     }
 
     @Override
-    public void nextGeneration( int newPopulation )
+    public void nextGeneration()
     {
         int oldPopulation = population;
-        super.nextGeneration( newPopulation );
+        super.nextGeneration();
 
+        int newPopulation = genetic.getPopulation();
         if ( newPopulation != oldPopulation )
-        {
             setPopulation( newPopulation );
-        }
     }
 
     @Override
