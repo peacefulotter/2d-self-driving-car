@@ -7,6 +7,7 @@ import com.peacefulotter.selfdrivingcar.ml.loss.Loss;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -17,12 +18,12 @@ public class IACar extends Car
     // Neural Network specifications (hyperparameters)
     //                                      x = ARROWS + 2
     //                                             2 = ACC & TURN
-    public static final int[] DIMENSIONS = {11, 20, 2};
+    public static final int[] DIMENSIONS = {9, 20, 40, 10, 2};
     private static final Activations[] ACTIVATIONS = {
-            Activations.ReLU, Activations.HyperTan
+            Activations.ReLU, Activations.ReLU, Activations.ReLU, Activations.HyperTan
     };
-    private static final int ARROWS = 9;
-    private static final boolean DRAW_ARROWS = true;
+    private static final int ARROWS = 7;
+    private static final boolean DRAW_ARROWS = false;
 
     private NeuralNetwork nn;
     private boolean isParent, isCrossed;
@@ -34,13 +35,18 @@ public class IACar extends Car
 
     public IACar( int nbArrows, boolean drawArrows )
     {
+        this( nbArrows, drawArrows, DIMENSIONS, ACTIVATIONS );
+    }
+
+    public IACar( int nbArrows, boolean drawArrows, int[] dimensions, Activations[] activations )
+    {
         super( nbArrows, drawArrows );
-        this.nn = new NeuralNetwork( DIMENSIONS, ACTIVATIONS );
+        this.nn = new NeuralNetwork( dimensions, activations );
     }
 
     public IACar( NeuralNetwork nn )
     {
-        super( ARROWS, DRAW_ARROWS );
+        super( nn.getDimensions()[0] - 2, DRAW_ARROWS );
         this.nn = nn;
     }
 
@@ -85,7 +91,7 @@ public class IACar extends Car
      */
     public Matrix2d simulate()
     {
-        Matrix2d data = new Matrix2d( 1, DIMENSIONS[0] );
+        Matrix2d data = new Matrix2d( 1, nn.getDimensions()[0] );
         // arrows length
         List<Double> arrowLengths = arrows.getLengths();
         int nbArrows = arrowLengths.size();

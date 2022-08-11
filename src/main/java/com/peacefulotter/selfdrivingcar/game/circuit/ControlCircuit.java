@@ -18,7 +18,7 @@ public class ControlCircuit extends Circuit
     private static final List<Matrix2d> positions = new ArrayList<>();
     private static final List<Vector2d> controls = new ArrayList<>();
 
-    private static final IACar car = new IACar( 9, true );
+    private static final IACar car = new IACar( 7, true );
 
     public ControlCircuit( Map map )
     {

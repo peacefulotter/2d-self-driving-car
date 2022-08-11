@@ -14,15 +14,21 @@ import javafx.stage.Stage;
 
 public class Compete extends Application
 {
+    private void addChallengerCar( Circuit circuit, String modelFilename )
+    {
+        NeuralNetwork trainedNN = new Loader().importModel( modelFilename );
+        IACar trainedCar = new IACar( trainedNN );
+        circuit.addCarToCircuit( trainedCar );
+    }
+
     @Override
     public void start( Stage stage )
     {
         Map map = DefaultStage.createMap(Maps.TEST);
         Circuit circuit = new ControlCircuit( map );
 
-        NeuralNetwork trainedNN = new Loader().importModel("model_best" );
-        IACar trainedCar = new IACar( trainedNN );
-        circuit.addCarToCircuit( trainedCar );
+        addChallengerCar( circuit, "model_big_best" );
+        addChallengerCar( circuit, "model_best" );
 
         DefaultStage.launch(stage, map, circuit);
     }

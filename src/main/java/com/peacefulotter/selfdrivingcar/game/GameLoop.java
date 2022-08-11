@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public class GameLoop extends AnimationTimer
 {
-    private static final double FRAMES_CAP = 240;
+    private static final double FRAMES_CAP = 100;
     private static final double FRAME_TIME = 1.0 / FRAMES_CAP;
     public static final IntegerProperty frames = new SimpleIntegerProperty(0);
 

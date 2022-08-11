@@ -9,6 +9,6 @@ import javafx.application.Application;
 public class Main
 {
     public static void main(String[] args) {
-        Application.launch(Classic.class, args);
+        Application.launch(Compete.class, args);
     }
 }
