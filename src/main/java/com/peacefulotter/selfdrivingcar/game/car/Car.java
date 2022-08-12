@@ -1,7 +1,6 @@
 package com.peacefulotter.selfdrivingcar.game.car;
 
 import com.peacefulotter.selfdrivingcar.game.circuit.GeneticCircuit;
-import com.peacefulotter.selfdrivingcar.game.map.MapParams;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
 import javafx.scene.CacheHint;
@@ -176,9 +175,12 @@ public class Car
         // setting the effect of an image view each frame is expensive
         if ( colorChanged )
         {
-            car.setEffect( colorEffect.getColor() );
+            CarColor.setCarColor( car, colorEffect.getColor() );
             colorChanged = false;
         }
+
+//        Color color = CarColor.interpolateColors(Color.RED, Color.GREEN, speed / MAX_SPEED );
+//        CarColor.setCarColor( car, color );
 
         // don't update the car rendering if it is dead
         if ( isDead() ) return;
@@ -193,6 +195,7 @@ public class Car
     private ImageView createImageView()
     {
         ImageView img = new ImageView( CAR_IMG );
+        img.setClip( new ImageView(CAR_IMG) );
         img.setCache( true );
         img.setCacheHint( CacheHint.SPEED );
         img.setOnMouseClicked( ( event ) -> {

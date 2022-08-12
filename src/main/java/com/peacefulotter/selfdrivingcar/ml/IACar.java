@@ -15,38 +15,40 @@ import java.util.function.Function;
 
 public class IACar extends Car
 {
+    private static final int ARROWS = 7;
+    private static final boolean DRAW_ARROWS = false;
+
     // Neural Network specifications (hyperparameters)
-    //                                      x = ARROWS + 2
-    //                                             2 = ACC & TURN
-    public static final int[] DIMENSIONS = {9, 20, 40, 10, 2};
+    private static final int INPUT_DETAILS_LENGTH = 2;
+    public static final int[] DIMENSIONS = {ARROWS + INPUT_DETAILS_LENGTH, 20, 40, 10, 2};
+    // ReLUs + HyperTan always
+    // TODO: generic Activations
     private static final Activations[] ACTIVATIONS = {
             Activations.ReLU, Activations.ReLU, Activations.ReLU, Activations.HyperTan
     };
-    private static final int ARROWS = 7;
-    private static final boolean DRAW_ARROWS = false;
 
     private NeuralNetwork nn;
     private boolean isParent, isCrossed;
 
     public IACar()
     {
-        this( ARROWS, DRAW_ARROWS );
+        this( DRAW_ARROWS );
     }
 
-    public IACar( int nbArrows, boolean drawArrows )
+    public IACar( boolean drawArrows )
     {
-        this( nbArrows, drawArrows, DIMENSIONS, ACTIVATIONS );
+        this( drawArrows, DIMENSIONS, ACTIVATIONS );
     }
 
-    public IACar( int nbArrows, boolean drawArrows, int[] dimensions, Activations[] activations )
+    public IACar( boolean drawArrows, int[] dimensions, Activations[] activations )
     {
-        super( nbArrows, drawArrows );
+        super( dimensions[0] - INPUT_DETAILS_LENGTH, drawArrows );
         this.nn = new NeuralNetwork( dimensions, activations );
     }
 
     public IACar( NeuralNetwork nn )
     {
-        super( nn.getDimensions()[0] - 2, DRAW_ARROWS );
+        super( nn.getDimensions()[0] - INPUT_DETAILS_LENGTH, DRAW_ARROWS );
         this.nn = nn;
     }
 

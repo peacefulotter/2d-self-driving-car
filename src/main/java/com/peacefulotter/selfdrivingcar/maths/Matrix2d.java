@@ -199,6 +199,11 @@ public class Matrix2d
         return m[i][j];
     }
 
+    public boolean contains( int i, int j )
+    {
+        return i >= 0 && j >= 0 && i < rows && j < cols;
+    }
+
     public void setRow(int i, double[] row)
     {
         for (int j = 0; j < cols; j++) {

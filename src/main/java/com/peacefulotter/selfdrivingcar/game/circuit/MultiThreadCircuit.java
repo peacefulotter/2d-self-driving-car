@@ -65,6 +65,7 @@ public class MultiThreadCircuit extends GeneticCircuit
     @Override
     public void update( double deltaTime )
     {
+        // TODO: need testing anymore?
         if ( isTesting )
         {
             threadedCircuits.get(0).update(deltaTime);

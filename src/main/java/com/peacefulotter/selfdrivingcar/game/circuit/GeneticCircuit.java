@@ -4,8 +4,6 @@ import com.peacefulotter.selfdrivingcar.game.map.Maps;
 import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.game.map.Map;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
-import com.peacefulotter.selfdrivingcar.ui.BottomPanel;
-import com.peacefulotter.selfdrivingcar.ui.GenerationPanel;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 import com.peacefulotter.selfdrivingcar.ml.genetic.Genetic;
 import javafx.beans.property.*;
@@ -19,12 +17,12 @@ public class GeneticCircuit extends Circuit
 
     private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
     private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
+    private static final IntegerProperty generation = new SimpleIntegerProperty(1);
     private static final StringProperty popProportion = new SimpleStringProperty("0 / 0" );
 
     protected final Genetic genetic;
 
     private double speed;
-    private int generation;
     private int deadCars;
 
     public GeneticCircuit( Map map, Genetic genetic )
@@ -53,9 +51,12 @@ public class GeneticCircuit extends Circuit
             System.out.println( "You only have selected " + parentsSize + " parent(s), this might lead to poor diversity and thus long or no training in the long run");
         }
 
+        // Change map
+        map.setParams( generation.get() % 3 == 0 ? Maps.TEST : Maps.DEFAULT );
+
         // apply crossovers to the parents
         // and generate the new population by mutating the crossed parents
-        List<IACar> newCars = genetic.nextGeneration( parents, generation + 1 );
+        List<IACar> newCars = genetic.nextGeneration( parents, generation.get() + 1 );
         createGeneration( newCars );
     }
 
@@ -68,11 +69,10 @@ public class GeneticCircuit extends Circuit
     void createGeneration( List<IACar> newCars )
     {
         setCars( newCars );
-        generation += 1;
         deadCars = 0;
+        generation.set( generation.get() + 1);
         selectedParents.setValue( 0 );
         averageSpeed.setValue( 0 );
-        GenerationPanel.setGen( generation );
     }
 
     // the selected cars become the parents for the next generation
@@ -131,8 +131,10 @@ public class GeneticCircuit extends Circuit
         }
     }
 
-    public int getGeneration() { return generation; }
-    public DoubleProperty getAverageSpeed() { return averageSpeed; }
-    public IntegerProperty getSelectedParents() { return selectedParents; }
-    public StringProperty getPopProportion() { return popProportion; }
+    public int getGeneration() { return generation.get(); }
+
+    public DoubleProperty getAverageSpeedProperty() { return averageSpeed; }
+    public IntegerProperty getSelectedParentsProperty() { return selectedParents; }
+    public IntegerProperty getGenerationProperty() { return generation; }
+    public StringProperty getPopProportionProperty() { return popProportion; }
 }

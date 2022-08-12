@@ -18,7 +18,15 @@ public class Arrows
         this.arrows = new ArrayList<>();
         this.drawArrows = drawArrows;
 
-        // initialize the 5 arrows
+        // initialize the arrows
+        if ( nbArrows == 1 )
+            this.arrows.add( new Arrow( hitbox, dir, 0 ) );
+        else
+            initArrows( hitbox, nbArrows, dir );
+    }
+
+    private void initArrows(  Matrix2d hitbox, int nbArrows, Vector2d dir )
+    {
         int baseAngle = -90;
         int shiftAngle = -2 * baseAngle / ( nbArrows - 1 );
         for ( int i = 0; i < nbArrows; i++ )

@@ -20,13 +20,22 @@ public class Classic extends Application
     {
         Map map = DefaultStage.createMap();
 
+        System.out.println(map.getChildren().size());
+
         Spinners spinners = new Spinners();
+        System.out.println(map.getChildren().size());
+
         GeneticParams params = spinners.getParams();
+
+        System.out.println(map.getChildren().size());
         Genetic genetic = new Genetic( params );
+        System.out.println(map.getChildren().size());
 
         GeneticCircuit circuit = new MultiThreadCircuit( map, genetic );
+        System.out.println(map.getChildren().size());
 
         GridPane menu = new Menu( map, circuit, spinners );
+        System.out.println(map.getChildren().size());
 
         DefaultStage.launch( stage, menu, circuit );
     }

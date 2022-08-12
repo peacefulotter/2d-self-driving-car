@@ -29,9 +29,9 @@ public class BottomPanel extends GridPane
         testMapButton.setOnMouseClicked( e -> circuit.testGeneration() );
         saveModelButton.setOnMouseClicked( event -> circuit.saveSelectedCar() );
 
-        circuit.getPopProportion().addListener( (e, o, n) -> popProportionLabel.setText( n ) );
-        circuit.getSelectedParents().addListener( (e, o, n) -> selectedParentsLabel.setText( n + " Parents selected" ) );
-        circuit.getAverageSpeed().addListener( (e, o, n) -> averageSpeed.setText( "Average Speed: " + String.format("%1$,.2f", n.doubleValue() * 100) ) );
+        circuit.getPopProportionProperty().addListener( (e, o, n) -> popProportionLabel.setText( n ) );
+        circuit.getSelectedParentsProperty().addListener( (e, o, n) -> selectedParentsLabel.setText( n + " Parents selected" ) );
+        circuit.getAverageSpeedProperty().addListener( (e, o, n) -> averageSpeed.setText( "Average Speed: " + String.format("%1$,.2f", n.doubleValue() * 100) ) );
 
         // Buttons and Information Bottom Box
         addRow( 0, selectedParentsLabel);

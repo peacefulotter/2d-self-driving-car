@@ -24,11 +24,12 @@ public class Compete extends Application
     @Override
     public void start( Stage stage )
     {
-        Map map = DefaultStage.createMap(Maps.TEST);
+        Map map = DefaultStage.createMap(Maps.DEFAULT);
         Circuit circuit = new ControlCircuit( map );
 
+        addChallengerCar( circuit, "model_big_insane_crash" );
         addChallengerCar( circuit, "model_big_best" );
-        addChallengerCar( circuit, "model_best" );
+        //        addChallengerCar( circuit, "model_best" );
 
         DefaultStage.launch(stage, map, circuit);
     }

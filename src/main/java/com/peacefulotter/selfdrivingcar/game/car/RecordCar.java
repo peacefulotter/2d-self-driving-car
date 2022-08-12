@@ -12,7 +12,7 @@ public class RecordCar extends IACar
 
     public RecordCar()
     {
-        super(5, true);
+        super(true);
     }
 
     @Override

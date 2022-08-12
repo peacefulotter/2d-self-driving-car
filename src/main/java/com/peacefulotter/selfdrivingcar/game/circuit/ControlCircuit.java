@@ -18,7 +18,7 @@ public class ControlCircuit extends Circuit
     private static final List<Matrix2d> positions = new ArrayList<>();
     private static final List<Vector2d> controls = new ArrayList<>();
 
-    private static final IACar car = new IACar( 7, true );
+    private static final IACar car = new IACar( true );
 
     public ControlCircuit( Map map )
     {
@@ -35,7 +35,6 @@ public class ControlCircuit extends Circuit
         // update all cars except the first one which is the controlled car
         super.update( deltaTime, 1, cars.size() );
 
-        Matrix2d x = car.simulate();
         Vector2d y = CarInput.getVector();
 
         car.accelerate( y.getX() );
@@ -43,7 +42,10 @@ public class ControlCircuit extends Circuit
         car.update( deltaTime );
 
         if ( SAVING )
+        {
+            Matrix2d x = car.simulate();
             saveCarState(x, y);
+        }
     }
 
     private void saveCarState( Matrix2d x, Vector2d y )

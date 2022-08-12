@@ -1,6 +1,7 @@
 package com.peacefulotter.selfdrivingcar.game.map;
 
 
+import com.peacefulotter.selfdrivingcar.game.car.Arrow;
 import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
@@ -15,13 +16,14 @@ import java.util.List;
 
 public class Map extends StackPane
 {
-    // number of children before the car images
-    private static final int BASE_CHILDREN = 2;
+
 
     private final Canvas canvas;
     private final GraphicsContext ctx;
 
     private final ImageView circuitImage;
+    // number of children before the car images
+    private final int baseChildren;;
 
     private boolean showDeadCars = true;
 
@@ -40,9 +42,13 @@ public class Map extends StackPane
         setParams(params);
 
         getChildren().addAll( circuitImage, canvas );
+        baseChildren = getChildren().size();
 
         setOnMouseClicked( mouseEvent -> canvas.requestFocus() );
         canvas.requestFocus();
+
+        // FIXME: Adding this messes with the getChildren().size() and generations thus dont work
+        // Arrow.addRects(this); // TODO: remove
     }
 
     public void setParams( Maps map )
@@ -76,7 +82,9 @@ public class Map extends StackPane
 
     public void remove( int from, int to )
     {
-        getChildren().remove( from + BASE_CHILDREN, to + BASE_CHILDREN );
+        System.out.println(getChildren().size());
+        getChildren().remove( from + baseChildren, to + baseChildren );
+        System.out.println(getChildren().size());
     }
 
     public void render( List<IACar> cars )

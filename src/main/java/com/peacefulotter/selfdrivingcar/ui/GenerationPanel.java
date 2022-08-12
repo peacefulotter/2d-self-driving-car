@@ -5,8 +5,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 
 public class GenerationPanel extends BorderPane
 {
@@ -16,14 +14,10 @@ public class GenerationPanel extends BorderPane
     public GenerationPanel( GeneticCircuit circuit )
     {
         label.setPadding( new Insets(5, 0, 0, 0 ) );
+        circuit.getGenerationProperty().addListener( (e, o, n) -> label.setText( "Generation " + n ));
         button.setOnMouseClicked( event -> circuit.nextGeneration() );
 
         setLeft( label );
         setRight( button );
-    }
-
-    public static void setGen( int generation )
-    {
-        label.setText( "Generation " + generation );
     }
 }
