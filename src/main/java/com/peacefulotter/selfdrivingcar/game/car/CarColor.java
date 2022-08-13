@@ -32,13 +32,17 @@ public enum CarColor
         );
     }
 
-    public static void setCarColor( ImageView img, Color color )
+    public Blend getBlend( ImageView img )
+    {
+        return getBlend( color, img );
+    }
+
+    public static Blend getBlend( Color color, ImageView img )
     {
         ColorAdjust monochrome = new ColorAdjust();
         monochrome.setSaturation(-1.0);
         ColorInput colorInput = new ColorInput(0, 0, img.getImage().getWidth(), img.getImage().getHeight(), color);
-        Blend blend = new Blend( BlendMode.MULTIPLY, monochrome, colorInput );
-        img.setEffect( blend );
+        return new Blend( BlendMode.MULTIPLY, monochrome, colorInput );
     }
 
     private static double lerp(double ratio, double origin, double target) {

@@ -7,7 +7,6 @@ import com.peacefulotter.selfdrivingcar.ml.loss.Loss;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -20,7 +19,7 @@ public class IACar extends Car
 
     // Neural Network specifications (hyperparameters)
     private static final int INPUT_DETAILS_LENGTH = 2;
-    public static final int[] DIMENSIONS = {ARROWS + INPUT_DETAILS_LENGTH, 20, 40, 10, 2};
+    public static final int[] DIMENSIONS = {ARROWS + INPUT_DETAILS_LENGTH, 32, 48, 16, 2};
     // ReLUs + HyperTan always
     // TODO: generic Activations
     private static final Activations[] ACTIVATIONS = {
@@ -66,24 +65,21 @@ public class IACar extends Car
 
         if ( !alive && !isParent && !isCrossed && !selected)
         {
-            colorEffect = CarColor.DEAD_COLOR;
-            colorChanged = true;
+            setColor( CarColor.DEAD_COLOR );
         }
     }
 
     public IACar setParent()
     {
         isParent = true;
-        colorEffect = CarColor.PARENT_COLOR;
-        colorChanged = true;
+        setColor( CarColor.PARENT_COLOR );
         return this;
     }
 
     public IACar setCrossedParent()
     {
         isCrossed = true;
-        colorEffect = CarColor.CROSSED_PARENT;
-        colorChanged = true;
+        setColor( CarColor.CROSSED_PARENT );
         return this;
     }
 

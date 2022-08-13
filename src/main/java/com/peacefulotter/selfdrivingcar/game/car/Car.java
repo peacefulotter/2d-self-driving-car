@@ -5,8 +5,10 @@ import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.maths.Vector2d;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 
 public class Car
 {
@@ -23,6 +25,9 @@ public class Car
     private static final double BRAKING_FACTOR = 0.2;
     private static final double TURN_DEGREE = 0.2;
 
+    private static final double FUTURE_ARROW_VISIBILITY = 3 / 4d;
+    private static final double FUTURE_ARROW_ANGLE = 50;
+
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( -CAR_LENGTH / 2, -CAR_WIDE / 2 );
     private static final Image CAR_IMG = new Image( "/img/car.png", CAR_LENGTH, CAR_WIDE, false, false );
     private static final double DEAD_OPACITY = 0.3;
@@ -32,26 +37,25 @@ public class Car
     public static double originAngle;
 
     private final ImageView car;
-    protected final Arrows arrows;
+    protected final Arrows arrows, rightArrows, leftArrows;
 
+    private final Vector2d originDirection;
     private Vector2d direction;
     private boolean isReset;
 
-    protected CarColor colorEffect = CarColor.NO_COLOR;
+    protected Color color;
     protected Vector2d position;
     protected double speed, acceleration, angle, angleSpeed;
-    protected boolean alive, selected, colorChanged;
+    protected boolean alive, selected;
 
     public Car( int nbArrows, boolean drawArrows )
     {
-        this.arrows = new Arrows( hitbox, nbArrows, drawArrows, getOriginDirection() );
+        this.originDirection = new Vector2d( 1, 0 ).rotate( Car.originAngle );
+        this.arrows = new Arrows( hitbox, nbArrows, drawArrows, originDirection.copy() );
+        this.rightArrows = new Arrows( hitbox, 4, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
+        this.leftArrows = new Arrows( hitbox, 4, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
         this.car = createImageView();
         resetCar();
-    }
-
-    private Vector2d getOriginDirection()
-    {
-        return new Vector2d( 1, 0 ).rotate( Car.originAngle );
     }
 
     /**
@@ -70,16 +74,16 @@ public class Car
      */
     public void resetCar()
     {
+        System.out.println("reset");
         partialReset();
 
         angle = originAngle;
         position = originPosition;
-        direction = getOriginDirection();
+        direction = originDirection.copy();
         alive = true;
         selected = false;
         isReset = false;
-        colorChanged = true;
-        colorEffect = CarColor.NO_COLOR;
+        setColor( CarColor.NO_COLOR.getColor() );
 
         car.setOpacity(1);
         car.setVisible( true );
@@ -89,6 +93,19 @@ public class Car
     {
         return car;
     }
+
+    public void setColor( CarColor color )
+    {
+        setColor( color.getColor() );
+    }
+
+    public void setColor( Color color )
+    {
+        this.color = color;
+        Effect effect = CarColor.getBlend( color, car );
+        car.setEffect( effect );
+    }
+
 
     public boolean isSelected()
     {
@@ -163,22 +180,26 @@ public class Car
 
         position = position.add( direction.mul( speed ) );
 
-        this.arrows.update( position, angle );
+        updateArrows(position, angle);
 
         alive = checkHitbox();
         if ( !alive )
             car.setOpacity( DEAD_OPACITY );
     }
 
+    private void updateArrows( Vector2d pos, double angle )
+    {
+        this.arrows.update( pos, angle );
+
+        Arrow centerArrow = arrows.getCenterArrow();
+        Vector2d center = centerArrow.getDirection().scale( centerArrow.getLength() * FUTURE_ARROW_VISIBILITY );
+        double deltaAngle = 90 ; // + FUTURE_ARROW_ANGLE;
+        this.rightArrows.update( center.add( pos ), angle + deltaAngle );
+        this.leftArrows.update( center.add( pos ), angle - deltaAngle );
+    }
+
     public void render( GraphicsContext ctx )
     {
-        // setting the effect of an image view each frame is expensive
-        if ( colorChanged )
-        {
-            CarColor.setCarColor( car, colorEffect.getColor() );
-            colorChanged = false;
-        }
-
 //        Color color = CarColor.interpolateColors(Color.RED, Color.GREEN, speed / MAX_SPEED );
 //        CarColor.setCarColor( car, color );
 
@@ -190,6 +211,8 @@ public class Car
         car.setRotate( angle );
 
         this.arrows.render( ctx );
+        this.rightArrows.render( ctx );
+        this.leftArrows.render( ctx );
     }
 
     private ImageView createImageView()
@@ -201,12 +224,12 @@ public class Car
         img.setOnMouseClicked( ( event ) -> {
             selected = !selected;
             GeneticCircuit.addSelected(selected ? 1 : -1);
-            colorEffect = selected
+            setColor( selected
                     ? CarColor.SELECTED_COLOR
                     :  alive
                         ? CarColor.NO_COLOR
-                        : CarColor.DEAD_COLOR;
-            colorChanged = true;
+                        : CarColor.DEAD_COLOR
+            );
         } );
         return img;
     }

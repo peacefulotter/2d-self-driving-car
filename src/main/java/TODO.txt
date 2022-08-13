@@ -1,3 +1,4 @@
+- /!!\ Circuit should hold a list of Car[] and not IACar[]
 - [X???] average speed is wrong in multi threading
 - [X] Implement the test map to see if the neural networks actually learn
 - [X] save the selected parents NN into files
@@ -6,7 +7,7 @@
 - [X] CIRCUIT REFACTOR -> MORE ABSTRACT CLASS
 - [X] abstraction of spinners -> not passed to circuit constructor
 - [X] Circuit -> remove population attribute
-- /!!!\ [NN IACar] replace acceleration with deltaArrows
+- /!!!\ [NN IACar] add reflected arrow to the neural network input
 - /!!\ Import model -> dimensions define nb of arrows
 - Arrow length flickers on hitbox edges
 

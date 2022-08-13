@@ -1,7 +1,6 @@
 package com.peacefulotter.selfdrivingcar.game.map;
 
 
-import com.peacefulotter.selfdrivingcar.game.car.Arrow;
 import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
@@ -16,8 +15,6 @@ import java.util.List;
 
 public class Map extends StackPane
 {
-
-
     private final Canvas canvas;
     private final GraphicsContext ctx;
 
@@ -82,9 +79,7 @@ public class Map extends StackPane
 
     public void remove( int from, int to )
     {
-        System.out.println(getChildren().size());
         getChildren().remove( from + baseChildren, to + baseChildren );
-        System.out.println(getChildren().size());
     }
 
     public void render( List<IACar> cars )

@@ -21,7 +21,6 @@ public class Circuit
 
     public void addCarToCircuit( IACar car )
     {
-        car.resetCar();
         cars.add( car );
         map.addCarToMap( car );
     }
