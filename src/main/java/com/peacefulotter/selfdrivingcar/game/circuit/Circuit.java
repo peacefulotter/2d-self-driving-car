@@ -1,17 +1,16 @@
 package com.peacefulotter.selfdrivingcar.game.circuit;
 
+import com.peacefulotter.selfdrivingcar.game.car.Car;
 import com.peacefulotter.selfdrivingcar.game.map.Map;
-import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
-import com.peacefulotter.selfdrivingcar.ml.IACar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Circuit
+public class Circuit<CarT extends Car>
 {
     protected final Map map;
 
-    protected List<IACar> cars;
+    protected List<CarT> cars;
 
     public Circuit( Map map )
     {
@@ -19,17 +18,17 @@ public class Circuit
         this.cars = new ArrayList<>();
     }
 
-    public void addCarToCircuit( IACar car )
+    public void addCarToCircuit( CarT car )
     {
         cars.add( car );
         map.addCarToMap( car );
     }
 
-    public void setCars( List<IACar> newCars )
+    public void setCars( List<CarT> newCars )
     {
         // clear the map and add the new cars
         map.remove( 0, cars.size() );
-        for ( IACar car: newCars )
+        for ( Car car: newCars )
             map.addCarToMap( car );
         cars = newCars;
     }
@@ -40,21 +39,11 @@ public class Circuit
     {
         for ( int i = from; i < to; i++ )
         {
-            IACar car = cars.get( i );
-            if ( car.isDead() && !car.isReset() )
-            {
-                car.partialReset();
+            Car car = cars.get( i );
+
+            if ( car.isDead() )
                 continue;
-            }
 
-            // get the output from the NN
-            Matrix2d output = car.simulate();
-            double throttle = output.getAt( 0, 0 );
-            double turn = output.getAt( 0, 1 );
-
-            // and apply it to the car
-            car.accelerate( throttle );
-            car.turn( turn );
             car.update( deltaTime );
         }
     }

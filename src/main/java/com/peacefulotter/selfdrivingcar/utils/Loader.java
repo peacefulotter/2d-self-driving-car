@@ -1,5 +1,6 @@
 package com.peacefulotter.selfdrivingcar.utils;
 
+import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
 import com.peacefulotter.selfdrivingcar.game.car.Record;
 import com.peacefulotter.selfdrivingcar.ml.activation.Activations;
@@ -147,8 +148,9 @@ public class Loader
         layer.put( "b", bMatrix );
     }
 
-    public void saveModel( NeuralNetwork nn )
+    public void saveModel( IACar car )
     {
+        NeuralNetwork nn = car.getCopyNN();
         long id = Math.round(Math.random() * 10000);
 
         try (PrintWriter pw = new PrintWriter("res/model_" + id + ".json"))
@@ -164,6 +166,8 @@ public class Loader
                 layers.put( layer );
             }
 
+            main.put("arrows", car.nbArrows );
+            main.put("futureArrows", car.nbFutureArrows );
             main.put("dimensions", nn.getDimensions() );
             main.put("activations", Arrays.stream(nn.getActivationFuncs())
                 .map( (act) -> act.getFunc().name )
@@ -178,7 +182,7 @@ public class Loader
         }
     }
 
-    public NeuralNetwork importModel( String filename )
+    public IACar importModel( String filename )
     {
         try
         {
@@ -187,6 +191,8 @@ public class Loader
             String text = new String(Files.readAllBytes(path));
             JSONObject main = new JSONObject(text);
 
+            int arrows = (int) main.get("arrows");
+            int futureArrows = (int) main.get("futureArrows");
             JSONArray dimensions = (JSONArray) main.get("dimensions");
             JSONArray activationsName = (JSONArray) main.get("activations");
             JSONArray layers = (JSONArray) main.get("layers");
@@ -211,7 +217,8 @@ public class Loader
                 network.setW(i, w);
                 network.setB(i, b);
             }
-            return network;
+
+            return new IACar( arrows, futureArrows, network );
         }
         catch (IOException | JSONException e) {
             e.printStackTrace();

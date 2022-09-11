@@ -6,6 +6,7 @@ import com.peacefulotter.selfdrivingcar.ml.activation.Activations;
 import com.peacefulotter.selfdrivingcar.ml.loss.Loss;
 import com.peacefulotter.selfdrivingcar.maths.Matrix2d;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
+import javafx.scene.canvas.GraphicsContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,20 +15,26 @@ import java.util.function.Function;
 
 public class IACar extends Car
 {
-    private static final int ARROWS = 7;
+    private static final int ARROWS = 5;
+    private static final int FUTURE_ARROWS = 4; // for both ways
     private static final boolean DRAW_ARROWS = false;
 
     // Neural Network specifications (hyperparameters)
-    private static final int INPUT_DETAILS_LENGTH = 2;
-    public static final int[] DIMENSIONS = {ARROWS + INPUT_DETAILS_LENGTH, 32, 48, 16, 2};
-    // ReLUs + HyperTan always
+    private static final int INPUT_DETAILS_SIZE = 2;
+    private static final int INPUT_SIZE = ARROWS + FUTURE_ARROWS * 2 + INPUT_DETAILS_SIZE;
+    private static final int OUTPUT_SIZE = 2;
+    private static final int HIDDEN_LAYER_SIZE = (int) Math.ceil( (2 / 3d) * INPUT_SIZE + 2 );
+    public static final int[] DIMENSIONS = {INPUT_SIZE, HIDDEN_LAYER_SIZE, OUTPUT_SIZE};
+    // always ReLU(s) + HyperTan
     // TODO: generic Activations
     private static final Activations[] ACTIVATIONS = {
-            Activations.ReLU, Activations.ReLU, Activations.ReLU, Activations.HyperTan
+            Activations.ReLU, Activations.HyperTan
     };
 
     private NeuralNetwork nn;
     private boolean isParent, isCrossed;
+
+    public int nbArrows, nbFutureArrows;
 
     public IACar()
     {
@@ -36,18 +43,25 @@ public class IACar extends Car
 
     public IACar( boolean drawArrows )
     {
-        this( drawArrows, DIMENSIONS, ACTIVATIONS );
+        this( drawArrows, ARROWS, FUTURE_ARROWS );
     }
 
-    public IACar( boolean drawArrows, int[] dimensions, Activations[] activations )
+    public IACar( boolean drawArrows, int nbArrows, int nbFutureArrows )
     {
-        super( dimensions[0] - INPUT_DETAILS_LENGTH, drawArrows );
+        this( drawArrows, nbArrows, nbFutureArrows, DIMENSIONS, ACTIVATIONS );
+    }
+
+    public IACar( boolean drawArrows, int nbArrows, int nbFutureArrows, int[] dimensions, Activations[] activations )
+    {
+        super( nbArrows, nbFutureArrows, drawArrows );
+        this.nbArrows = nbArrows;
+        this.nbFutureArrows = nbFutureArrows;
         this.nn = new NeuralNetwork( dimensions, activations );
     }
 
-    public IACar( NeuralNetwork nn )
+    public IACar( int nbArrows, int nbFutureArrows, NeuralNetwork nn )
     {
-        super( nn.getDimensions()[0] - INPUT_DETAILS_LENGTH, DRAW_ARROWS );
+        this( DRAW_ARROWS, nbArrows, nbFutureArrows );
         this.nn = nn;
     }
 
@@ -56,17 +70,6 @@ public class IACar extends Car
         super.resetCar();
         isParent = false;
         isCrossed = false;
-    }
-
-    @Override
-    public void update(double deltaTime)
-    {
-        super.update(deltaTime);
-
-        if ( !alive && !isParent && !isCrossed && !selected)
-        {
-            setColor( CarColor.DEAD_COLOR );
-        }
     }
 
     public IACar setParent()
@@ -83,6 +86,19 @@ public class IACar extends Car
         return this;
     }
 
+    @Override
+    public void update( double deltaTime )
+    {
+        // get the output from the NN
+        Matrix2d output = simulate();
+        double acc = output.getAt( 0, 0 );
+        double angle = output.getAt( 0, 1 );
+
+        accelerate( acc );
+        turn( angle );
+        super.update( deltaTime );
+    }
+
     /**
      * Simulates the NeuralNetwork
      * @return the prediction of the neural network
@@ -91,7 +107,7 @@ public class IACar extends Car
     {
         Matrix2d data = new Matrix2d( 1, nn.getDimensions()[0] );
         // arrows length
-        List<Double> arrowLengths = arrows.getLengths();
+        List<Double> arrowLengths = getArrowLengths();
         int nbArrows = arrowLengths.size();
         for (int i = 0; i < nbArrows; i++)
             data.setAt( 0, i, arrowLengths.get(i) );

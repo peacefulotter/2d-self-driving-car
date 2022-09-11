@@ -31,7 +31,7 @@ public class Genetic
 
     private void addMutatedParent(List<IACar> cars, IACar parent )
     {
-        cars.add( new IACar( mutate( parent ) ) );
+        cars.add( new IACar( parent.nbArrows, parent.nbFutureArrows, mutate( parent ) ) );
     }
 
     private List<IACar> getCrossoverParents( List<IACar> parents )
@@ -43,7 +43,7 @@ public class Genetic
         {
             // add default parents
             IACar parent = parents.get( i );
-            IACar copyParent = new IACar( parent.getCopyNN() ).setParent();
+            IACar copyParent = new IACar( parent.nbArrows, parent.nbFutureArrows, parent.getCopyNN() ).setParent();
             fullParents.add( copyParent ); // copy nn?
 
             // and crossover them
@@ -51,7 +51,7 @@ public class Genetic
             {
                 IACar otherParent = parents.get( j );
                 NeuralNetwork crossNN = crossover( parent, otherParent );
-                IACar crossedParent = new IACar( crossNN ).setCrossedParent();
+                IACar crossedParent = new IACar( parent.nbArrows, parent.nbFutureArrows, crossNN ).setCrossedParent();
                 fullParents.add( crossedParent );
             }
         }

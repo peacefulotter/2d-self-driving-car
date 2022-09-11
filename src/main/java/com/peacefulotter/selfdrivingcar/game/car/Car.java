@@ -10,6 +10,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Car
 {
     private static final double CAR_LENGTH = 43.333;
@@ -26,7 +29,7 @@ public class Car
     private static final double TURN_DEGREE = 0.2;
 
     private static final double FUTURE_ARROW_VISIBILITY = 3 / 4d;
-    private static final double FUTURE_ARROW_ANGLE = 50;
+    private static final double FUTURE_ARROW_ANGLE = 120;
 
     private static final Vector2d SHIFT_ORIGIN = new Vector2d( -CAR_LENGTH / 2, -CAR_WIDE / 2 );
     private static final Image CAR_IMG = new Image( "/img/car.png", CAR_LENGTH, CAR_WIDE, false, false );
@@ -36,24 +39,29 @@ public class Car
     public static Vector2d originPosition;
     public static double originAngle;
 
-    private final ImageView car;
-    protected final Arrows arrows, rightArrows, leftArrows;
-
+    private final Arrows arrows, rightArrows, leftArrows;
     private final Vector2d originDirection;
+
     private Vector2d direction;
-    private boolean isReset;
+
+    protected final ImageView car;
 
     protected Color color;
     protected Vector2d position;
     protected double speed, acceleration, angle, angleSpeed;
-    protected boolean alive, selected;
+    protected boolean isAlive, isSelected;
 
     public Car( int nbArrows, boolean drawArrows )
     {
+        this(nbArrows, 0, drawArrows);
+    }
+
+    public Car( int nbArrows, int nbFutureArrows, boolean drawArrows )
+    {
         this.originDirection = new Vector2d( 1, 0 ).rotate( Car.originAngle );
         this.arrows = new Arrows( hitbox, nbArrows, drawArrows, originDirection.copy() );
-        this.rightArrows = new Arrows( hitbox, 4, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
-        this.leftArrows = new Arrows( hitbox, 4, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
+        this.rightArrows = new Arrows( hitbox, nbFutureArrows, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
+        this.leftArrows = new Arrows( hitbox, nbFutureArrows, drawArrows, originDirection.copy(), FUTURE_ARROW_ANGLE );
         this.car = createImageView();
         resetCar();
     }
@@ -66,7 +74,6 @@ public class Car
         speed = 0;
         acceleration = 0;
         angleSpeed = 0;
-        isReset = true;
     }
 
     /**
@@ -74,15 +81,13 @@ public class Car
      */
     public void resetCar()
     {
-        System.out.println("reset");
         partialReset();
 
         angle = originAngle;
         position = originPosition;
         direction = originDirection.copy();
-        alive = true;
-        selected = false;
-        isReset = false;
+        isAlive = true;
+        isSelected = false;
         setColor( CarColor.NO_COLOR.getColor() );
 
         car.setOpacity(1);
@@ -107,14 +112,14 @@ public class Car
     }
 
 
-    public boolean isSelected()
+    public boolean getIsSelected()
     {
-        return selected;
+        return isSelected;
     }
 
     public double getSpeed()
     {
-        if ( !alive )
+        if ( !isAlive )
         {
             return 0;
         }
@@ -165,7 +170,7 @@ public class Car
 
     public void update( double deltaTime )
     {
-        if ( !alive ) return;
+        if ( !isAlive ) return;
 
         double newSpeed = speed + ( acceleration - SLOWNESS ) * deltaTime * SPEED_EASE;
         if ( newSpeed <= MAX_SPEED && newSpeed >= 0 )
@@ -182,9 +187,12 @@ public class Car
 
         updateArrows(position, angle);
 
-        alive = checkHitbox();
-        if ( !alive )
-            car.setOpacity( DEAD_OPACITY );
+        isAlive = checkHitbox();
+
+        if ( !isAlive )
+        {
+            partialReset();
+        }
     }
 
     private void updateArrows( Vector2d pos, double angle )
@@ -204,7 +212,11 @@ public class Car
 //        CarColor.setCarColor( car, color );
 
         // don't update the car rendering if it is dead
-        if ( isDead() ) return;
+        if ( isDead() && car.getOpacity() != DEAD_OPACITY )
+        {
+            car.setOpacity( 0.3 );
+            return;
+        }
 
         car.setTranslateX( position.getX() + SHIFT_ORIGIN.getX() );
         car.setTranslateY( position.getY() + SHIFT_ORIGIN.getY()  );
@@ -222,11 +234,11 @@ public class Car
         img.setCache( true );
         img.setCacheHint( CacheHint.SPEED );
         img.setOnMouseClicked( ( event ) -> {
-            selected = !selected;
-            GeneticCircuit.addSelected(selected ? 1 : -1);
-            setColor( selected
+            isSelected = !isSelected;
+            GeneticCircuit.addSelected(isSelected ? 1 : -1);
+            setColor( isSelected
                     ? CarColor.SELECTED_COLOR
-                    :  alive
+                    :  isAlive
                         ? CarColor.NO_COLOR
                         : CarColor.DEAD_COLOR
             );
@@ -234,9 +246,17 @@ public class Car
         return img;
     }
 
+    public List<Double> getArrowLengths()
+    {
+        List<Double> lengths = new ArrayList<>();
+        lengths.addAll( arrows.getLengths() );
+        lengths.addAll( leftArrows.getLengths() );
+        lengths.addAll( rightArrows.getLengths() );
+        return lengths;
+    }
+
     public boolean isDead()
     {
-        return !alive;
+        return !isAlive;
     }
-    public boolean isReset() { return isReset; }
 }

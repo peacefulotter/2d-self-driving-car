@@ -11,7 +11,7 @@ public class Control extends Application {
     @Override
     public void start(Stage stage) {
         Map map = DefaultStage.createMap();
-        Circuit circuit = new ControlCircuit( map );
+        ControlCircuit circuit = new ControlCircuit( map );
         DefaultStage.launch(stage, map, circuit);
     }
 }

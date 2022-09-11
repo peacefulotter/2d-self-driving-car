@@ -27,7 +27,6 @@ public class ModelParent extends Application
         String[] models = new String[] { "3505", "5224", "3149", "best" };
         List<IACar> trainedNNs = Arrays.stream(models)
                 .map(m -> loader.importModel("model_" + m))
-                .map(IACar::new)
                 .toList();
 
         Map map = DefaultStage.createMap(Maps.TEST);

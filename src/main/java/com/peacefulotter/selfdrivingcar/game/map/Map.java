@@ -2,7 +2,6 @@ package com.peacefulotter.selfdrivingcar.game.map;
 
 
 import com.peacefulotter.selfdrivingcar.game.car.Car;
-import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.utils.Loader;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -82,11 +81,11 @@ public class Map extends StackPane
         getChildren().remove( from + baseChildren, to + baseChildren );
     }
 
-    public void render( List<IACar> cars )
+    public <CarT extends Car> void render( List<CarT> cars )
     {
         ctx.clearRect( 0, 0, canvas.getWidth(), canvas.getHeight() );
 
-        for (IACar car: cars)
+        for (CarT car: cars)
         {
             car.getCarImgView().setVisible( !car.isDead() || showDeadCars );
             car.render(ctx);

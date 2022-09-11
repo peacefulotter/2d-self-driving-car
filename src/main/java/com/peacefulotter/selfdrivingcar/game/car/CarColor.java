@@ -9,25 +9,26 @@ import javafx.scene.paint.Color;
 
 public enum CarColor
 {
-    NO_COLOR(72, 202, 228 ),
+    NO_COLOR( 72, 202, 228 ),
     SELECTED_COLOR( 239, 71, 111 ),
-    PARENT_COLOR(  6, 214, 160 ),
-    CROSSED_PARENT(  255, 209, 102 ),
+    PARENT_COLOR( 6, 214, 160 ),
+    CROSSED_PARENT( 255, 209, 102 ),
     DEAD_COLOR( 74, 78, 105 );
 
     private final Color color;
 
     CarColor( int r, int g, int b )
     {
-        color = Color.rgb(r, g, b);
+        color = Color.rgb( r, g, b );
     }
 
-    public static Color interpolateColors(Color origin, Color target, double ratio) {
-        var opacity = lerp(ratio, origin.getOpacity(), target.getOpacity());
+    public static Color interpolateColors( Color origin, Color target, double ratio )
+    {
+        var opacity = lerp( ratio, origin.getOpacity(), target.getOpacity() );
         return opacity == 0.0 ? Color.TRANSPARENT : Color.color(
-            boundedLerp(ratio, origin.getRed() * origin.getOpacity(), target.getRed() * target.getOpacity()) / opacity,
-            boundedLerp(ratio, origin.getGreen() * origin.getOpacity(), target.getGreen() * target.getOpacity()) / opacity,
-            boundedLerp(ratio, origin.getBlue() * origin.getOpacity(), target.getBlue() * target.getOpacity()) / opacity,
+            boundedLerp( ratio, origin.getRed() * origin.getOpacity(), target.getRed() * target.getOpacity() ) / opacity,
+            boundedLerp( ratio, origin.getGreen() * origin.getOpacity(), target.getGreen() * target.getOpacity() ) / opacity,
+            boundedLerp( ratio, origin.getBlue() * origin.getOpacity(), target.getBlue() * target.getOpacity() ) / opacity,
             opacity
         );
     }
@@ -40,19 +41,23 @@ public enum CarColor
     public static Blend getBlend( Color color, ImageView img )
     {
         ColorAdjust monochrome = new ColorAdjust();
-        monochrome.setSaturation(-1.0);
-        ColorInput colorInput = new ColorInput(0, 0, img.getImage().getWidth(), img.getImage().getHeight(), color);
+        monochrome.setSaturation( -1.0 );
+        ColorInput colorInput = new ColorInput( 0, 0, img.getImage().getWidth(), img.getImage().getHeight(), color );
         return new Blend( BlendMode.MULTIPLY, monochrome, colorInput );
     }
 
-    private static double lerp(double ratio, double origin, double target) {
+    private static double lerp( double ratio, double origin, double target )
+    {
         return origin + (target - origin) * ratio;
     }
 
     private static double boundedLerp( double ratio, double origin, double target )
     {
-        return Math.min(1, Math.max(lerp(ratio, origin, target), 0));
+        return Math.min( 1, Math.max( lerp( ratio, origin, target ), 0 ) );
     }
 
-    public Color getColor() { return color; }
+    public Color getColor()
+    {
+        return color;
+    }
 }

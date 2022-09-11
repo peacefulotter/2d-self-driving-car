@@ -11,26 +11,23 @@ import javafx.beans.property.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GeneticCircuit extends Circuit
+public class GeneticCircuit extends Circuit<IACar>
 {
     private static final int DIVERSITY_THRESHOLD = 3;
 
-    private static final DoubleProperty averageSpeed = new SimpleDoubleProperty(0);
-    private static final IntegerProperty selectedParents = new SimpleIntegerProperty(0);
-    private static final IntegerProperty generation = new SimpleIntegerProperty(1);
-    private static final StringProperty popProportion = new SimpleStringProperty("0 / 0" );
+    private static final DoubleProperty averageSpeed = new SimpleDoubleProperty( 0 );
+    private static final IntegerProperty selectedParents = new SimpleIntegerProperty( 0 );
+    private static final IntegerProperty generation = new SimpleIntegerProperty( 1 );
+    private static final StringProperty popProportion = new SimpleStringProperty( "0 / 0" );
 
     protected final Genetic genetic;
-
-    private double speed;
-    private int deadCars;
 
     public GeneticCircuit( Map map, Genetic genetic )
     {
         super( map );
         this.genetic = genetic;
 
-        for (int i = 0; i < genetic.getPopulation(); i++)
+        for ( int i = 0; i < genetic.getPopulation(); i++ )
             addCarToCircuit( new IACar() );
     }
 
@@ -44,11 +41,11 @@ public class GeneticCircuit extends Circuit
         int parentsSize = parents.size();
         if ( parentsSize == 0 )
         {
-            System.out.println( "No parent selected, aborting next generation and rerunning this gen.");
+            System.out.println( "No parent selected, aborting next generation and rerunning this gen." );
             return;
         } else if ( parentsSize < DIVERSITY_THRESHOLD )
         {
-            System.out.println( "You only have selected " + parentsSize + " parent(s), this might lead to poor diversity and thus long or no training in the long run");
+            System.out.println( "You only have selected " + parentsSize + " parent(s), this might lead to poor diversity and thus long or no training in the long run" );
         }
 
         // Change map
@@ -69,72 +66,77 @@ public class GeneticCircuit extends Circuit
     void createGeneration( List<IACar> newCars )
     {
         setCars( newCars );
-        deadCars = 0;
-        generation.set( generation.get() + 1);
+        generation.set( generation.get() + 1 );
         selectedParents.setValue( 0 );
         averageSpeed.setValue( 0 );
+        popProportion.setValue( cars.size() + " / " + cars.size() );
     }
 
     // the selected cars become the parents for the next generation
     List<IACar> getGenParents()
     {
         return cars.stream()
-            .filter(Car::isSelected)
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    protected void update( double deltaTime, int from, int to )
-    {
-        super.update(deltaTime, from, to);
-
-        for ( int i = from; i < to; i++ )
-        {
-            IACar car = cars.get( i );
-            if ( car.isDead() && !car.isReset() )
-            {
-                deadCars += 1;
-                continue;
-            }
-            speed += car.getSpeed();
-        }
+            .filter( Car::getIsSelected )
+            .collect( Collectors.toList() );
     }
 
     @Override
     public void render()
     {
         super.render();
+
         int population = cars.size();
+        int deadCars = 0;
+        double speed = 0;
+        for ( IACar car : cars )
+        {
+            if ( car.isDead() )
+                deadCars += 1;
+            speed += car.getSpeed();
+        }
+
         averageSpeed.setValue( speed / (double) population );
         popProportion.setValue( population - deadCars + " / " + deadCars );
-        speed = 0;
     }
 
     public void testGeneration()
     {
         map.setParams( Maps.TEST );
         List<IACar> parents = getGenParents();
-        parents.forEach(IACar::resetCar);
-        System.out.println("Testing on " + parents.size() + " parents");
+        parents.forEach( IACar::resetCar );
+        System.out.println( "Testing on " + parents.size() + " parents" );
         createGeneration( parents );
     }
 
     public void saveSelectedCar()
     {
-        for ( IACar car: cars )
+        for ( IACar car : cars )
         {
-            if ( car.isSelected() )
+            if ( car.getIsSelected() )
             {
-                new Loader().saveModel( car.getCopyNN() );
+                new Loader().saveModel( car );
                 return;
             }
         }
     }
 
-    public int getGeneration() { return generation.get(); }
+    public DoubleProperty getAverageSpeedProperty()
+    {
+        return averageSpeed;
+    }
 
-    public DoubleProperty getAverageSpeedProperty() { return averageSpeed; }
-    public IntegerProperty getSelectedParentsProperty() { return selectedParents; }
-    public IntegerProperty getGenerationProperty() { return generation; }
-    public StringProperty getPopProportionProperty() { return popProportion; }
+    public IntegerProperty getSelectedParentsProperty()
+    {
+        return selectedParents;
+    }
+
+    public IntegerProperty getGenerationProperty()
+    {
+        return generation;
+    }
+
+    public StringProperty getPopProportionProperty()
+    {
+        return popProportion;
+    }
 }

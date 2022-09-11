@@ -1,4 +1,4 @@
-- /!!\ Circuit should hold a list of Car[] and not IACar[]
+- [X] Circuit should hold a list of Car[] and not IACar[]
 - [X???] average speed is wrong in multi threading
 - [X] Implement the test map to see if the neural networks actually learn
 - [X] save the selected parents NN into files
@@ -8,7 +8,10 @@
 - [X] abstraction of spinners -> not passed to circuit constructor
 - [X] Circuit -> remove population attribute
 - /!!!\ [NN IACar] add reflected arrow to the neural network input
-- /!!\ Import model -> dimensions define nb of arrows
+- [X] Import model -> dimensions define nb of arrows
 - Arrow length flickers on hitbox edges
+- add nbArrows + nbFutureArrows field when saving and importing nn
+- IACar constructor refactor -> nn details should be abstracted + Builder for dimension + activation used in Main?
+- dead cars throws index out of bounds
 
 - Crossover cars are either bad or too similar to parents

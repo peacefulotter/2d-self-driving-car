@@ -15,9 +15,6 @@ public class TestModel extends Application {
     @Override
     public void start(Stage stage)
     {
-        Loader loader = new Loader();
-        NeuralNetwork network = loader.importModel("model_5224.json");
-
         Map map = DefaultStage.createMap();
         GeneticCircuit circuit = new MultiThreadCircuit(map, DefaultGenetic.GENETIC );
         DefaultStage.launch( stage, map, circuit );
