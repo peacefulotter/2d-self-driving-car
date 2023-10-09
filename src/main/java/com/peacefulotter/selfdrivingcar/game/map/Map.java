@@ -14,17 +14,17 @@ import java.util.List;
 
 public class Map extends StackPane
 {
+    private final Loader loader;
     private final Canvas canvas;
     private final GraphicsContext ctx;
-
     private final ImageView circuitImage;
-    // number of children before the car images
-    private final int baseChildren;;
+    private final int baseChildren; // number of children before the car images
 
     private boolean showDeadCars = true;
 
     public Map( int width, int height, Maps params )
     {
+        this.loader = new Loader();
         this.canvas = new Canvas( width, height );
         this.ctx = canvas.getGraphicsContext2D();
 
@@ -53,7 +53,8 @@ public class Map extends StackPane
 
         Car.originPosition = params.getPosition();
         Car.originAngle = params.getAngle();
-        Car.hitbox = new Loader().loadHitbox( params.getHitbox(), canvas.getWidth(), canvas.getHeight() );
+        Car.hitbox = loader.loadHitbox( params.getHitbox(), canvas.getWidth(), canvas.getHeight() );
+        Car.cost = loader.loadCost( params.getCost(), canvas.getWidth(), canvas.getHeight() );
 
         Image img = new Image( params.getImg() );
         circuitImage.setImage( img );

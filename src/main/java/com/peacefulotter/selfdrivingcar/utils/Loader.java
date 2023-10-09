@@ -1,5 +1,6 @@
 package com.peacefulotter.selfdrivingcar.utils;
 
+import com.peacefulotter.selfdrivingcar.maths.MatrixLambda;
 import com.peacefulotter.selfdrivingcar.ml.IACar;
 import com.peacefulotter.selfdrivingcar.ml.NeuralNetwork;
 import com.peacefulotter.selfdrivingcar.game.car.Record;
@@ -24,7 +25,12 @@ import java.util.stream.Collectors;
 
 public class Loader
 {
+    private interface ImgLoaderLambda {
+        double apply(Matrix2d res, int i, int j, Color color);
+    }
+
     private static final Color ROAD_COLOR = Color.color( 42f / 255, 170f / 255, 255f / 255, 255f / 255 );
+    private static final Color VOID_COLOR = Color.color( 255f / 255, 42f / 255, 42f / 255, 255f / 255 );
 
     // an input stream to read the files
     private InputStream resourceStream( String resourceName )
@@ -32,24 +38,27 @@ public class Loader
         return getClass().getResourceAsStream( resourceName );
     }
 
-    public Matrix2d loadHitbox( String path, double width, double height )
+    // TODO: double?
+    private Matrix2d loadImg( String path, double width, double height, ImgLoaderLambda func )
     {
         Image img = new Image( path, width, height, false, false );
         PixelReader reader = img.getPixelReader();
+        return new Matrix2d( (int) height, (int) width )
+            .applyFunc( (mat, i, j) -> func.apply(mat, i, j, reader.getColor(j, i)) );
+    }
 
-        Matrix2d res = new Matrix2d( (int) height, (int) width );
-        for ( int i = 0; i < height; i++ )
-        {
-            for ( int j = 0; j < width; j++ )
-            {
-                Color color = reader.getColor( j, i );
-                if ( color.equals( ROAD_COLOR ) )
-                    res.setAt( i, j, 1 );
-                else
-                    res.setAt( i, j, 0 );
-            }
-        }
-        return res;
+    public Matrix2d loadHitbox( String path, double width, double height )
+    {
+        return loadImg( path, width, height, (mat, i, j, color) ->
+            color.equals( ROAD_COLOR ) ? 1 : 0
+        );
+    }
+
+    public Matrix2d loadCost( String path, double width, double height )
+    {
+        return loadImg( path, width, height, (mat, i, j, color) ->
+            color.equals( VOID_COLOR ) ? 0 : color.getGreen() // the greener the lower the cost
+        );
     }
 
     public static void saveDrivingData( List<Matrix2d> X, List<Vector2d> Y )
